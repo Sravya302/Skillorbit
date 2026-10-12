@@ -1,993 +1,710 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campus2Career AI College Dashboard</title>
+    <title>Campus2Career AI Student Directory & Analytics</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Interactive Charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81'
-                        }
+                        darkbg: '#0B0F17',
+                        cardbg: '#111827',
+                        hoverbg: '#1F2937',
+                        accentblue: '#38BDF8',
+                        accentdark: '#0284C7',
                     }
                 }
             }
         }
     </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom scrollbar for clean UI */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F17;
+            color: #F3F4F6;
+        }
+        /* Custom scrollbar for dark mode */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #0B0F17;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
+            background: #1F2937;
+            border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: #374151;
+        }
+        /* Select dropdown dark override */
+        select option {
+            background-color: #111827;
+            color: #F3F4F6;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-full flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+<body class="bg-[#0B0F17] text-slate-100 min-h-screen p-3 md:p-6 antialiased">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
-                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- Top Header Card -->
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-5 md:p-6 shadow-2xl relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">Student Directory & Analytics</h1>
+                        <span class="bg-sky-500/10 text-sky-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-500/20">AI Powered</span>
+                    </div>
+                    <p class="text-slate-400 text-sm mt-1">Filter students by status, branch, software languages, and communication skills.</p>
                 </div>
                 <div>
-                    <h1 class="font-bold text-slate-900 text-lg leading-snug flex items-center gap-2">
-                        Campus2Career <span class="bg-brand-100 text-brand-700 text-xs px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">AI Hub</span>
-                    </h1>
-                    <p class="text-xs text-slate-500">Student & Alumni Intelligence Portal</p>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-3">
-                <button onclick="openAddModal()" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-xl shadow-sm transition-all cursor-pointer">
-                    <i class="fa-solid fa-user-plus text-xs"></i>
-                    <span>Add Profile</span>
-                </button>
-                <div class="h-6 w-px bg-slate-200"></div>
-                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer" title="Toggle Theme">
-                    <i class="fa-solid fa-moon dark:hidden"></i>
-                    <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 overflow-y-auto">
-
-        <!-- Statistics Summary Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Records</p>
-                    <h3 id="stat-total" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
-                    <p class="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                        <i class="fa-solid fa-arrow-trend-up"></i> Active database
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Students</p>
-                    <h3 id="stat-students" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
-                    <p class="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">
-                        <i class="fa-solid fa-book-open"></i> Enrolled learners
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-user-graduate"></i>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Alumni</p>
-                    <h3 id="stat-alumni" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
-                    <p class="text-xs text-purple-600 font-medium mt-1 flex items-center gap-1">
-                        <i class="fa-solid fa-briefcase"></i> Working professionals
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-user-tie"></i>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Average CGPA</p>
-                    <h3 id="stat-cgpa" class="text-2xl font-bold text-slate-900 mt-1">0.0</h3>
-                    <p class="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
-                        <i class="fa-solid fa-award"></i> Academic benchmark
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analytics Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-code text-brand-600"></i> Top Software Languages
-                    </h4>
-                    <span class="text-xs text-slate-400">Distribution across records</span>
-                </div>
-                <div class="h-64 relative flex items-center justify-center">
-                    <canvas id="softwareChart"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-language text-brand-600"></i> Communication Languages Spoken
-                    </h4>
-                    <span class="text-xs text-slate-400">Multilingual proficiency</span>
-                </div>
-                <div class="h-64 relative flex items-center justify-center">
-                    <canvas id="languageChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Advanced Filtering Panel -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-filter text-brand-600"></i>
-                    <h3 class="font-bold text-slate-900 text-base">Advanced Filters & Search</h3>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="resetFilters()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">
-                        <i class="fa-solid fa-rotate-right"></i> Reset All
-                    </button>
-                    <button onclick="exportData()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors cursor-pointer">
-                        <i class="fa-solid fa-download"></i> Export JSON
+                    <button id="resetFiltersBtn" onclick="resetAllFilters()" class="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 px-4 py-2 rounded-xl text-sm font-medium transition border border-sky-500/20">
+                        <i class="fa-solid fa-rotate-right text-xs"></i> Reset All Filters
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- Search box -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Search Name / Roll / Email</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                        </span>
-                        <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
+            <!-- Dropdown & Search Controls -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
+                <!-- Search Input -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </div>
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search branch, student..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-[#1B2433] border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+                </div>
+
+                <!-- Status Filter Dropdown -->
+                <div class="relative">
+                    <select id="statusFilter" onchange="applyFilters()" class="w-full bg-[#1B2433] border border-slate-700/80 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 appearance-none focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 cursor-pointer pr-8 font-medium">
+                        <option value="ALL">All Statuses</option>
+                        <option value="Current Student">Current Student</option>
+                        <option value="Alumni / Passed Out">Alumni / Passed Out</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
                     </div>
                 </div>
 
-                <!-- Category & Student Status Filter -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Student & Alumni Status</label>
-                    <select id="roleFilter" onchange="applyFilters()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
-                        <option value="">All students / alumni</option>
-                        <option value="Current">Current students</option>
-                        <option value="1st year">1st year</option>
-                        <option value="2nd year">2nd year</option>
-                        <option value="3rd year">3rd year</option>
-                        <option value="final year">Final year</option>
-                        <option value="Alumni">Passed out students / alumni</option>
-                    </select>
-                </div>
-
-                <!-- Branch Filter -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Branch</label>
-                    <select id="branchFilter" onchange="applyFilters()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
-                        <option value="">All Branches</option>
-                        <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                <!-- Branch Filter Dropdown -->
+                <div class="relative">
+                    <select id="branchFilter" onchange="applyFilters()" class="w-full bg-[#1B2433] border border-slate-700/80 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 appearance-none focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 cursor-pointer pr-8 font-medium">
+                        <option value="ALL">All Branches</option>
+                        <option value="Computer Science">Computer Science</option>
                         <option value="Information Technology">Information Technology</option>
                         <option value="Electronics & Communication">Electronics & Communication</option>
+                        <option value="Electrical Engineering">Electrical Engineering</option>
                         <option value="Mechanical Engineering">Mechanical Engineering</option>
-                        <option value="Artificial Intelligence & ML">Artificial Intelligence & ML</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
                     </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
 
-                <!-- Sorting Option -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Sort Records By</label>
-                    <select id="sortBy" onchange="applyFilters()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
-                        <option value="name">Name (A-Z)</option>
-                        <option value="cgpa-high">CGPA (High to Low)</option>
-                        <option value="cgpa-low">CGPA (Low to High)</option>
-                        <option value="year-new">Graduation Year (Newest)</option>
+                <!-- Student Year / Batch Filter Dropdown (User Requested Options) -->
+                <div class="relative">
+                    <select id="yearFilter" onchange="applyFilters()" class="w-full bg-[#1B2433] border border-slate-700/80 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 appearance-none focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 cursor-pointer pr-8 font-medium">
+                        <option value="ALL">All Students</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="Final Year">Final Year</option>
+                        <option value="Passed Out / Alumni">Passed Out / Alumni</option>
                     </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
             </div>
 
-            <!-- Multi-Select Pill Filters -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-code text-brand-600 mr-1"></i> Software Languages (Select Options)
-                    </label>
-                    <div id="softwareFilters" class="flex flex-wrap gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl min-h-[50px] items-center">
-                        <!-- Populated dynamically -->
-                    </div>
+            <!-- Software Languages Multi-Select Pills -->
+            <div class="mt-6 pt-5 border-t border-slate-800">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                    <i class="fa-solid fa-code text-sky-400 mr-1.5"></i> SOFTWARE LANGUAGES LEARNED (SELECT MULTIPLE)
+                </label>
+                <div id="softwarePills" class="flex flex-wrap gap-2">
+                    <!-- Dynamic Pill Badges -->
                 </div>
+            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-comments text-brand-600 mr-1"></i> Communication Languages (Select Options)
-                    </label>
-                    <div id="communicationFilters" class="flex flex-wrap gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl min-h-[50px] items-center">
-                        <!-- Populated dynamically -->
-                    </div>
+            <!-- Spoken Languages Multi-Select Pills -->
+            <div class="mt-4">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                    <i class="fa-solid fa-comments text-sky-400 mr-1.5"></i> SPOKEN COMMUNICATION LANGUAGES (SELECT MULTIPLE)
+                </label>
+                <div id="spokenPills" class="flex flex-wrap gap-2">
+                    <!-- Dynamic Pill Badges -->
                 </div>
             </div>
         </div>
 
-        <!-- Directory Section -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-slate-900 text-base">Directory Records</h3>
-                    <p id="resultCount" class="text-xs text-slate-500">Showing all records</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="setViewMode('grid')" id="gridBtn" class="p-2 rounded-lg bg-brand-50 text-brand-600 text-sm transition-colors cursor-pointer" title="Grid View"><i class="fa-solid fa-grip"></i></button>
-                    <button onclick="setViewMode('table')" id="tableBtn" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 text-sm transition-colors cursor-pointer" title="Table View"><i class="fa-solid fa-table-list"></i></button>
-                </div>
+        <!-- Results Counter & Table Header -->
+        <div class="flex items-center justify-between px-1">
+            <h2 id="studentCounter" class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                SHOWING <span id="visibleCount" class="text-sky-400 font-extrabold">0</span> OF <span id="totalCount" class="text-slate-300">0</span> STUDENTS
+            </h2>
+            <div class="text-xs text-slate-400 flex items-center gap-2">
+                <span>Click any row for full profile analytics</span>
             </div>
+        </div>
 
-            <!-- Grid Container -->
-            <div id="gridView" class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Cards rendered dynamically -->
-            </div>
-
-            <!-- Table Container -->
-            <div id="tableView" class="hidden overflow-x-auto">
+        <!-- Table Container -->
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+            <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50/70 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                            <th class="py-3 px-6">Name & Roll ID</th>
-                            <th class="py-3 px-6">Category</th>
-                            <th class="py-3 px-6">Branch & Year</th>
-                            <th class="py-3 px-6">CGPA</th>
-                            <th class="py-3 px-6">Software Skills</th>
-                            <th class="py-3 px-6 text-right">Actions</th>
+                        <tr class="border-b border-slate-800 bg-[#161F2E] text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3.5 px-4">STUDENT INFO</th>
+                            <th class="py-3.5 px-4">BRANCH & BATCH</th>
+                            <th class="py-3.5 px-4">CGPA / %</th>
+                            <th class="py-3.5 px-4">KEY SOFTWARE SKILLS</th>
+                            <th class="py-3.5 px-4">SPOKEN LANGUAGES</th>
+                            <th class="py-3.5 px-4">SUCCESS SCORE</th>
+                            <th class="py-3.5 px-4">RISK FLAG</th>
+                            <th class="py-3.5 px-4 text-center">ACTION</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
-                        <!-- Rows rendered dynamically -->
+                    <tbody id="studentTableBody" class="divide-y divide-slate-800/60 text-sm">
+                        <!-- Dynamic Student Rows Rendered Here -->
                     </tbody>
                 </table>
             </div>
 
             <!-- Empty State -->
-            <div id="emptyState" class="hidden py-16 text-center">
-                <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fa-solid fa-folder-open"></i>
+            <div id="emptyState" class="hidden text-center py-12 px-4">
+                <div class="w-12 h-12 rounded-full bg-slate-800/80 flex items-center justify-center mx-auto mb-3 text-slate-500">
+                    <i class="fa-solid fa-user-slash text-xl"></i>
                 </div>
-                <h4 class="font-bold text-slate-700 text-base">No matching records found</h4>
-                <p class="text-xs text-slate-400 mt-1">Try adjusting your search criteria or multi-select filters.</p>
-                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-brand-50 text-brand-600 rounded-xl text-xs font-semibold hover:bg-brand-100 transition-colors cursor-pointer">Reset Filters</button>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Profile Detail Modal -->
-    <div id="profileModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <div class="p-6 sm:p-8 space-y-6">
-                <!-- Modal Header -->
-                <div class="flex items-start justify-between">
-                    <div class="flex items-center space-x-4">
-                        <img id="modalAvatar" src="https://placehold.co/100x100/6366f1/ffffff?text=Avatar" alt="Avatar" class="w-16 h-16 rounded-2xl object-cover shadow-sm">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 id="modalName" class="font-bold text-xl text-slate-900">Student Name</h3>
-                                <span id="modalRoleBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-600">Student</span>
-                            </div>
-                            <p id="modalRollId" class="text-xs font-mono text-slate-400 mt-0.5">Roll ID: CSE2021001</p>
-                            <p id="modalEmail" class="text-xs text-slate-600 mt-1 flex items-center gap-1.5"><i class="fa-regular fa-envelope text-brand-500"></i> email@college.edu</p>
-                        </div>
-                    </div>
-                    <button onclick="closeModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-
-                <!-- Academic Info Grid -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <div>
-                        <span class="block text-xs font-medium text-slate-400">CGPA</span>
-                        <span id="modalCgpa" class="text-base font-bold text-slate-900">9.2</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-medium text-slate-400">Percentage</span>
-                        <span id="modalPercentage" class="text-base font-bold text-slate-900">92%</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-medium text-slate-400">Branch</span>
-                        <span id="modalBranch" class="text-sm font-semibold text-slate-800 truncate block">CSE</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-medium text-slate-400">Graduation Year</span>
-                        <span id="modalYear" class="text-sm font-bold text-slate-800">2025</span>
-                    </div>
-                </div>
-
-                <!-- Skills & Languages -->
-                <div class="space-y-4">
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-code text-brand-500 mr-1.5"></i> Software Languages</h4>
-                        <div id="modalSoftware" class="flex flex-wrap gap-1.5"></div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-language text-brand-500 mr-1.5"></i> Communication Languages</h4>
-                        <div id="modalCommunication" class="flex flex-wrap gap-1.5"></div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-certificate text-brand-500 mr-1.5"></i> Certifications</h4>
-                        <div id="modalCertifications" class="flex flex-wrap gap-1.5"></div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-briefcase text-brand-500 mr-1.5"></i> Internships / Experience</h4>
-                        <p id="modalInternships" class="text-sm text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">None specified</p>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-brain text-brand-500 mr-1.5"></i> Soft Skills</h4>
-                        <div id="modalSoftSkills" class="flex flex-wrap gap-1.5"></div>
-                    </div>
-                </div>
-
-                <!-- Social Links & Footer -->
-                <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <a id="modalLinkedin" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-50 text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-100 transition-colors">
-                            <i class="fa-brands fa-linkedin"></i> LinkedIn
-                        </a>
-                        <a id="modalGithub" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition-colors">
-                            <i class="fa-brands fa-github"></i> GitHub
-                        </a>
-                    </div>
-                    <button onclick="closeModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer">Close</button>
-                </div>
+                <h3 class="text-base font-semibold text-slate-200">No students found</h3>
+                <p class="text-slate-400 text-sm mt-1">Try adjusting your filters or search keywords.</p>
+                <button onclick="resetAllFilters()" class="mt-4 px-4 py-1.5 bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs font-semibold rounded-lg hover:bg-sky-500/20 transition">Reset Filters</button>
             </div>
         </div>
     </div>
 
-    <!-- Add Profile Modal -->
-    <div id="addModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-slate-100 p-6 sm:p-8">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="font-bold text-xl text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus text-brand-600"></i> Add New Record
-                </h3>
-                <button onclick="closeAddModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer">
+    <!-- Full Profile Detail Modal -->
+    <div id="studentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity duration-200">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-[#111827]/95 backdrop-blur border-b border-slate-800 p-5 flex items-center justify-between z-10">
+                <div class="flex items-center gap-3">
+                    <div id="modalAvatar" class="w-12 h-12 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-lg border border-sky-500/30">
+                        JS
+                    </div>
+                    <div>
+                        <h3 id="modalName" class="text-xl font-bold text-white">Student Name</h3>
+                        <p id="modalRoll" class="text-xs text-slate-400">Roll ID: --</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <form id="addForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <!-- Modal Content -->
+            <div class="p-6 space-y-6">
+                <!-- Top Summary Stats -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#161F2E] p-4 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">Status</span>
+                        <span id="modalStatus" class="text-sm font-medium text-slate-200">--</span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">Year / Batch</span>
+                        <span id="modalBatch" class="text-sm font-medium text-sky-400">--</span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">CGPA / %</span>
+                        <span id="modalCGPA" class="text-sm font-bold text-emerald-400">--</span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">Success Score</span>
+                        <span id="modalSuccess" class="text-sm font-bold text-sky-400">--</span>
+                    </div>
+                </div>
+
+                <!-- Academic & Branch Details -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Academic Details</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-xs block">Branch</span>
+                            <span id="modalBranch" class="font-medium text-slate-200">--</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-xs block">Email Address</span>
+                            <span id="modalEmail" class="font-medium text-slate-200 break-all">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Skills -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Software Languages Learned</h4>
+                    <div id="modalSoftwareSkills" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Spoken Communication Languages -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Spoken Languages</h4>
+                    <div id="modalSpokenLanguages" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Internships & Certifications -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Full Name *</label>
-                        <input type="text" id="addName" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="John Doe">
+                        <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Certifications</h4>
+                        <ul id="modalCertifications" class="text-xs space-y-1.5 text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        </ul>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Roll ID *</label>
-                        <input type="text" id="addRollId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="CSE2024999">
+                        <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Internships</h4>
+                        <ul id="modalInternships" class="text-xs space-y-1.5 text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        </ul>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Category *</label>
-                        <select id="addRole" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                            <option value="Student">Student</option>
-                            <option value="Alumni">Alumni</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Email *</label>
-                        <input type="email" id="addEmail" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="john@college.edu">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Branch *</label>
-                        <select id="addBranch" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                            <option value="Computer Science & Engineering">Computer Science & Engineering</option>
-                            <option value="Information Technology">Information Technology</option>
-                            <option value="Electronics & Communication">Electronics & Communication</option>
-                            <option value="Mechanical Engineering">Mechanical Engineering</option>
-                            <option value="Artificial Intelligence & ML">Artificial Intelligence & ML</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">CGPA (0-10) *</label>
-                        <input type="number" step="0.01" min="0" max="10" id="addCgpa" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="8.5">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Grad Year *</label>
-                        <input type="number" id="addYear" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="2026">
-                    </div>
-                </div>
-
+                <!-- Soft Skills -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Software Languages (comma separated) *</label>
-                    <input type="text" id="addSoftware" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Java, Python, C++, SQL">
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Soft Skills</h4>
+                    <div id="modalSoftSkills" class="flex flex-wrap gap-2"></div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Communication Languages (comma separated) *</label>
-                    <input type="text" id="addCommunication" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="English, French, Telugu">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Certifications (comma separated)</label>
-                        <input type="text" id="addCertifications" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="AWS Certified, Oracle Java">
+                <!-- External Links -->
+                <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <a id="modalLinkedin" href="#" target="_blank" class="text-slate-400 hover:text-sky-400 transition flex items-center gap-1.5 text-xs font-medium bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-brands fa-linkedin text-sm text-sky-400"></i> LinkedIn
+                        </a>
+                        <a id="modalGithub" href="#" target="_blank" class="text-slate-400 hover:text-white transition flex items-center gap-1.5 text-xs font-medium bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-brands fa-github text-sm"></i> GitHub
+                        </a>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Soft Skills (comma separated)</label>
-                        <input type="text" id="addSoftSkills" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Leadership, Problem Solving">
-                    </div>
+                    <button onclick="closeModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition">Close</button>
                 </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Internships / Experience</label>
-                    <input type="text" id="addInternships" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Software Engineering Intern at TechCorp">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">LinkedIn URL</label>
-                        <input type="url" id="addLinkedin" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="https://linkedin.com/in/username">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">GitHub URL</label>
-                        <input type="url" id="addGithub" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="https://github.com/username">
-                    </div>
-                </div>
-
-                <div class="pt-4 flex items-center justify-end gap-3">
-                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer">Save Record</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <!-- Application JavaScript -->
     <script>
-        // Sample initial datasets
-        const defaultRecords = [
-            {
-                id: 1,
-                name: "Aarav Sharma",
-                rollId: "CSE2022012",
-                role: "Student",
-                academicYear: "3rd year",
-                branch: "Computer Science & Engineering",
-                cgpa: 9.1,
-                percentage: 91.0,
-                year: 2025,
-                email: "aarav.sharma@college.edu",
-                softwareLanguages: ["Python", "JavaScript", "C++", "SQL"],
-                communicationLanguages: ["English", "Hindi", "Telugu"],
-                certifications: ["AWS Cloud Practitioner", "Meta Front-End Developer"],
-                softSkills: ["Leadership", "Public Speaking", "Problem Solving"],
-                internships: "Frontend Intern at WebTech Solutions (3 Months)",
-                linkedin: "https://linkedin.com",
-                github: "https://github.com",
-                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-            },
-            {
-                id: 2,
-                name: "Priya Patel",
-                rollId: "ECE2021045",
-                role: "Student",
-                academicYear: "final year",
-                branch: "Electronics & Communication",
-                cgpa: 8.7,
-                percentage: 87.0,
-                year: 2024,
-                email: "priya.p@college.edu",
-                softwareLanguages: ["Java", "Python", "Embedded C"],
-                communicationLanguages: ["English", "Gujarati", "Hindi"],
-                certifications: ["Oracle Java SE Certified", "Embedded Systems Specialist"],
-                softSkills: ["Teamwork", "Critical Thinking"],
-                internships: "IoT Hardware Trainee at SmartDevices Inc.",
-                linkedin: "https://linkedin.com",
-                github: "https://github.com",
-                avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80"
-            },
-            {
-                id: 3,
-                name: "Rohan Verma",
-                rollId: "AIML2023089",
-                role: "Student",
-                academicYear: "2nd year",
-                branch: "Artificial Intelligence & ML",
-                cgpa: 9.5,
-                percentage: 95.0,
-                year: 2026,
-                email: "rohan.v@college.edu",
-                softwareLanguages: ["Python", "PyTorch", "R", "SQL"],
-                communicationLanguages: ["English", "Hindi"],
-                certifications: ["Deep Learning Specialization (Coursera)", "TensorFlow Developer"],
-                softSkills: ["Analytical Mindset", "Adaptability"],
-                internships: "AI Research Assistant - Campus AI Lab",
-                linkedin: "https://linkedin.com",
-                github: "https://github.com",
-                avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80"
-            },
-            {
-                id: 4,
-                name: "Sneha Reddy",
-                rollId: "IT2020004",
-                role: "Alumni",
-                academicYear: "Alumni",
-                branch: "Information Technology",
-                cgpa: 8.9,
-                percentage: 89.0,
-                year: 2023,
-                email: "sneha.reddy@techcorp.com",
-                softwareLanguages: ["Java", "Spring Boot", "TypeScript", "Docker"],
-                communicationLanguages: ["English", "Telugu"],
-                certifications: ["AWS Solutions Architect", "Scrum Master"],
-                softSkills: ["Agile Methodologies", "Project Management"],
-                internships: "Software Engineer at CloudNative Solutions",
-                linkedin: "https://linkedin.com",
-                github: "https://github.com",
-                avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80"
-            },
-            {
-                id: 5,
-                name: "Karan Gupta",
-                rollId: "MECH2024015",
-                role: "Student",
-                academicYear: "1st year",
-                branch: "Mechanical Engineering",
-                cgpa: 8.2,
-                percentage: 82.0,
-                year: 2027,
-                email: "karan.g@college.edu",
-                softwareLanguages: ["Python", "MATLAB", "C++"],
-                communicationLanguages: ["English", "Hindi", "German"],
-                certifications: ["AutoCAD Certified Professional"],
-                softSkills: ["Creativity", "Time Management"],
-                internships: "Engineering CAD Intern",
-                linkedin: "https://linkedin.com",
-                github: "https://github.com",
-                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
-            }
-        ];
+        // Sample Student Dataset
+        let students = [];
+let loadingStudents = true;
+let apiError = "";
 
-        // State variables
-        let records = JSON.parse(localStorage.getItem('c2c_records')) || defaultRecords;
-        let viewMode = 'grid'; // 'grid' or 'table'
-        let selectedSoftware = new Set();
-        let selectedCommunication = new Set();
-        let softwareChartInstance = null;
-        let languageChartInstance = null;
+const branchNames = {
+    CSE: "Computer Science",
+    IT: "Information Technology",
+    ECE: "Electronics & Communication",
+    EEE: "Electrical Engineering",
+    MECH: "Mechanical Engineering",
+    CIVIL: "Civil Engineering"
+};
 
-        window.onload = function() {
-            initCharts();
-            populateFilterPills();
-            applyFilters();
-        };
+function formatList(value) {
+    if (Array.isArray(value)) return value;
+    if (!value) return [];
 
-        function populateFilterPills() {
-            const allSw = new Set();
-            const allComm = new Set();
+    try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+    } catch (error) {
+        // Support semicolon-separated values too.
+    }
 
-            records.forEach(r => {
-                r.softwareLanguages.forEach(s => allSw.add(s));
-                r.communicationLanguages.forEach(c => allComm.add(c));
-            });
+    return String(value)
+        .split(";")
+        .map(item => item.trim())
+        .filter(Boolean);
+}
 
-            const swContainer = document.getElementById('softwareFilters');
-            swContainer.innerHTML = Array.from(allSw).map(sw => `
-                <button onclick="toggleSoftwarePill('${sw}')" id="sw-pill-${sw.replace(/[^a-zA-Z0-9]/g, '_')}" 
-                    class="px-3 py-1 rounded-xl text-xs font-medium transition-all cursor-pointer bg-white border border-slate-200 text-slate-600 hover:border-brand-500">
-                    ${sw}
-                </button>
-            `).join('');
+function formatBatch(student) {
+    if (student.status === "Alumni / Passed Out") {
+        return "Passed Out / Alumni";
+    }
 
-            const commContainer = document.getElementById('communicationFilters');
-            commContainer.innerHTML = Array.from(allComm).map(comm => `
-                <button onclick="toggleCommPill('${comm}')" id="comm-pill-${comm.replace(/[^a-zA-Z0-9]/g, '_')}" 
-                    class="px-3 py-1 rounded-xl text-xs font-medium transition-all cursor-pointer bg-white border border-slate-200 text-slate-600 hover:border-brand-500">
-                    ${comm}
-                </button>
-            `).join('');
+    return student.batch || ({
+        1: "1st Year",
+        2: "2nd Year",
+        3: "3rd Year",
+        4: "Final Year"
+    }[student.year] || "Not provided");
+}
+
+function formatCgpa(student) {
+    const cgpa = student.cgpaVal ?? student.cgpa;
+    const percentage = student.percentage;
+
+    if (cgpa == null && percentage == null) {
+        return "Not provided";
+    }
+
+    const parts = [];
+
+    if (cgpa != null && cgpa !== "") {
+        parts.push(`${cgpa} CGPA`);
+    }
+
+    if (percentage != null && percentage !== "") {
+        parts.push(`${percentage}%`);
+    }
+
+    return parts.join(" / ");
+}
+
+function normalizeStudent(student) {
+    return {
+        ...student,
+        id: student.id || student.student_id,
+        roll: student.roll || student.student_id,
+        name: student.name || "Unknown",
+        branch: branchNames[student.branch || student.department]
+            || student.branch
+            || student.department
+            || "Not provided",
+        batch: formatBatch(student),
+        status: student.status || "Current Student",
+        cgpa: formatCgpa(student),
+        cgpaVal: student.cgpaVal ?? student.cgpa ?? null,
+        softwareSkills: formatList(
+            student.softwareSkills ?? student.skills
+        ),
+        spokenLanguages: formatList(
+            student.spokenLanguages ?? student.spoken_languages
+        ),
+        certifications: formatList(student.certifications),
+        internships: formatList(student.internships),
+        softSkills: formatList(
+            student.softSkills ?? student.soft_skills
+        ),
+        successScore: student.successScore ?? student.success_score ?? null,
+        riskFlag: student.riskFlag ?? student.risk_flag ?? null,
+        email: student.email || "",
+        linkedin: student.linkedin || "",
+        github: student.github || ""
+    };
+}
+
+async function loadStudents() {
+    loadingStudents = true;
+    apiError = "";
+
+    try {
+        const response = await fetch("/api/students");
+
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
         }
 
-        function toggleSoftwarePill(sw) {
-            const safeId = 'sw-pill-' + sw.replace(/[^a-zA-Z0-9]/g, '_');
-            const btn = document.getElementById(safeId);
-            if (selectedSoftware.has(sw)) {
-                selectedSoftware.delete(sw);
-                btn.className = "px-3 py-1 rounded-xl text-xs font-medium transition-all cursor-pointer bg-white border border-slate-200 text-slate-600 hover:border-brand-500";
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            throw new Error("Unexpected API response");
+        }
+
+        students = data.map(normalizeStudent);
+    } catch (error) {
+        apiError = error.message;
+        console.error("Could not load students:", error);
+    } finally {
+        loadingStudents = false;
+        applyFilters();
+    }
+} 
+        // Available Filter Pills Options
+        const softwareOptions = ["Python", "JavaScript", "React", "C++", "Java", "SQL", "Go", "AutoCAD", "MATLAB", "SystemVerilog", "Node.js", "HTML/CSS"];
+        const spokenOptions = ["English", "Hindi", "French", "German", "Telugu", "Spanish", "Tamil", "Japanese", "Mandarin"];
+
+        // Selected State for Multi-Select Pills
+        let selectedSoftware = [];
+        let selectedSpoken = [];
+
+        // Initialize UI Elements
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPillOptions();
+            LoadStudents();
+        });
+
+        // Render Filter Pill Controls
+        function renderPillOptions() {
+            const swContainer = document.getElementById('softwarePills');
+            swContainer.innerHTML = softwareOptions.map(lang => {
+                const isSelected = selectedSoftware.includes(lang);
+                return `
+                    <button onclick="toggleSoftware('${lang}')" class="px-3 py-1 rounded-lg text-xs font-medium transition border ${
+                        isSelected 
+                        ? 'bg-sky-500 text-slate-950 font-semibold border-sky-400 shadow-sm shadow-sky-500/20' 
+                        : 'bg-[#1B2433] text-slate-300 border-slate-700/80 hover:bg-slate-700/60'
+                    }">
+                        ${isSelected ? '<i class="fa-solid fa-check mr-1 text-[10px]"></i>' : ''}${lang}
+                    </button>
+                `;
+            }).join('');
+
+            const spContainer = document.getElementById('spokenPills');
+            spContainer.innerHTML = spokenOptions.map(lang => {
+                const isSelected = selectedSpoken.includes(lang);
+                return `
+                    <button onclick="toggleSpoken('${lang}')" class="px-3 py-1 rounded-lg text-xs font-medium transition border ${
+                        isSelected 
+                        ? 'bg-sky-500 text-slate-950 font-semibold border-sky-400 shadow-sm shadow-sky-500/20' 
+                        : 'bg-[#1B2433] text-slate-300 border-slate-700/80 hover:bg-slate-700/60'
+                    }">
+                        ${isSelected ? '<i class="fa-solid fa-check mr-1 text-[10px]"></i>' : ''}${lang}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleSoftware(lang) {
+            if (selectedSoftware.includes(lang)) {
+                selectedSoftware = selectedSoftware.filter(item => item !== lang);
             } else {
-                selectedSoftware.add(sw);
-                btn.className = "px-3 py-1 rounded-xl text-xs font-medium transition-all cursor-pointer bg-brand-600 text-white shadow-xs border border-brand-600";
+                selectedSoftware.push(lang);
             }
+            renderPillOptions();
             applyFilters();
         }
 
-        function toggleCommPill(comm) {
-            const safeId = 'comm-pill-' + comm.replace(/[^a-zA-Z0-9]/g, '_');
-            const btn = document.getElementById(safeId);
-            if (selectedCommunication.has(comm)) {
-                selectedCommunication.delete(comm);
-                btn.className = "px-3 py-1 rounded-xl text-xs font-medium transition-all cursor-pointer bg-white border border-slate-200 text-slate-600 hover:border-brand-500";
+        function toggleSpoken(lang) {
+            if (selectedSpoken.includes(lang)) {
+                selectedSpoken = selectedSpoken.filter(item => item !== lang);
             } else {
-                selectedCommunication.add(comm);
-                btn.className = "px-3 py-1 rounded-xl text-xs font-medium transition-all cursor-pointer bg-brand-600 text-white shadow-xs border border-brand-600";
+                selectedSpoken.push(lang);
             }
+            renderPillOptions();
             applyFilters();
         }
 
-        function resetFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('roleFilter').value = '';
-            document.getElementById('branchFilter').value = '';
-            document.getElementById('sortBy').value = 'name';
-            selectedSoftware.clear();
-            selectedCommunication.clear();
-            populateFilterPills();
-            applyFilters();
-        }
-
-        // Apply filters and sorting
-        function getFilteredRecords() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const role = document.getElementById('roleFilter').value;
-            const branch = document.getElementById('branchFilter').value;
-            const sortBy = document.getElementById('sortBy').value;
-
-            let filtered = records.filter(rec => {
-                const matchSearch = rec.name.toLowerCase().includes(search) || 
-                                    rec.rollId.toLowerCase().includes(search) || 
-                                    rec.email.toLowerCase().includes(search);
-                
-                // Flexible filter supporting roles and year-specific options
-                let matchRole = true;
-                if (role === 'Current') {
-                    matchRole = rec.role === 'Student';
-                } else if (role === 'Alumni') {
-                    matchRole = rec.role === 'Alumni';
-                } else if (role) {
-                    // Match specific year (1st year, 2nd year, 3rd year, final year)
-                    matchRole = rec.academicYear && rec.academicYear.toLowerCase() === role.toLowerCase();
-                }
-
-                const matchBranch = !branch || rec.branch === branch;
-
-                const matchSoftware = selectedSoftware.size === 0 || 
-                    [...selectedSoftware].every(s => rec.softwareLanguages.includes(s));
-
-                const matchComm = selectedCommunication.size === 0 || 
-                    [...selectedCommunication].every(c => rec.communicationLanguages.includes(c));
-
-                return matchSearch && matchRole && matchBranch && matchSoftware && matchComm;
-            });
-
-            // Sorting
-            filtered.sort((a, b) => {
-                if (sortBy === 'name') return a.name.localeCompare(b.name);
-                if (sortBy === 'cgpa-high') return b.cgpa - a.cgpa;
-                if (sortBy === 'cgpa-low') return a.cgpa - b.cgpa;
-                if (sortBy === 'year-new') return b.year - a.year;
-                return 0;
-            });
-
-            return filtered;
-        }
-
+        // Apply All Filter Criteria
         function applyFilters() {
-            const filtered = getFilteredRecords();
-            renderStats(filtered);
-            renderDirectory(filtered);
-            updateCharts(filtered);
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusVal = document.getElementById('statusFilter').value;
+            const branchVal = document.getElementById('branchFilter').value;
+            const yearVal = document.getElementById('yearFilter').value;
+
+            const filtered = students.filter(student => {
+                // Search Filter
+                const matchesSearch = !searchVal || 
+                    student.name.toLowerCase().includes(searchVal) ||
+                    student.branch.toLowerCase().includes(searchVal) ||
+                    student.roll.toLowerCase().includes(searchVal);
+
+                // Status Filter
+                const matchesStatus = statusVal === 'ALL' || student.status === statusVal;
+
+                // Branch Filter
+                const matchesBranch = branchVal === 'ALL' || student.branch === branchVal;
+
+                // Student Year Filter
+                const matchesYear = yearVal === 'ALL' || student.batch === yearVal;
+
+                // Software Skills Multi-Select Filter (Must match at least one selected if any)
+                const matchesSoftware = selectedSoftware.length === 0 || 
+                    selectedSoftware.every(sw => student.softwareSkills.includes(sw));
+
+                // Spoken Languages Multi-Select Filter (Must match at least one selected if any)
+                const matchesSpoken = selectedSpoken.length === 0 || 
+                    selectedSpoken.every(sp => student.spokenLanguages.includes(sp));
+
+                return matchesSearch && matchesStatus && matchesBranch && matchesYear && matchesSoftware && matchesSpoken;
+            });
+
+            renderStudentTable(filtered);
         }
 
-        // Render Statistics Cards
-        function renderStats(filtered) {
-            const total = records.length;
-            const students = records.filter(r => r.role === 'Student').length;
-            const alumni = records.filter(r => r.role === 'Alumni').length;
-            const avgCgpa = records.length ? (records.reduce((acc, r) => acc + r.cgpa, 0) / records.length).toFixed(2) : 0.0;
-
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-students').innerText = students;
-            document.getElementById('stat-alumni').innerText = alumni;
-            document.getElementById('stat-cgpa').innerText = avgCgpa;
-            document.getElementById('resultCount').innerText = `Showing ${filtered.length} of ${total} records`;
-        }
-
-        // Render Directory (Grid & Table)
-        function renderDirectory(filtered) {
-            const gridView = document.getElementById('gridView');
-            const tableView = document.getElementById('tableView');
-            const tableBody = document.getElementById('tableBody');
+        // Render Table Rows
+        function renderStudentTable(data) {
+            const tbody = document.getElementById('studentTableBody');
             const emptyState = document.getElementById('emptyState');
+            
+            document.getElementById('visibleCount').innerText = data.length;
+            document.getElementById('totalCount').innerText = students.length;
 
-            if (filtered.length === 0) {
-                gridView.classList.add('hidden');
-                tableView.classList.add('hidden');
+            if (data.length === 0) {
+                tbody.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             }
 
             emptyState.classList.add('hidden');
-            if (viewMode === 'grid') {
-                gridView.classList.remove('hidden');
-                tableView.classList.add('hidden');
-            } else {
-                gridView.classList.add('hidden');
-                tableView.classList.remove('hidden');
-            }
 
-            // Grid Cards
-            gridView.innerHTML = filtered.map(rec => `
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between group">
-                    <div>
-                        <div class="flex items-start justify-between gap-3 mb-3">
-                            <div class="flex items-center space-x-3">
-                                <img src="${rec.avatar || 'https://placehold.co/100x100/6366f1/ffffff?text=Avatar'}" alt="" class="w-12 h-12 rounded-xl object-cover shadow-xs" onerror="this.src='https://placehold.co/100x100/6366f1/ffffff?text=Avatar'">
+            tbody.innerHTML = data.map(student => {
+                // Risk Badge Styles
+                const riskBadgeClass =
+    student.riskFlag === "High Risk"
+        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+        : student.riskFlag === "Medium Risk"
+            ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+            : student.riskFlag === "Low Risk"
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-slate-500/10 text-slate-400 border-slate-500/20";
+
+                // Render Software Pills (Show first 3)
+                const swPills = student.softwareSkills.slice(0, 3).map(s => 
+                    `<span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded border border-slate-700/60">${s}</span>`
+                ).join(' ');
+                const extraSw = student.softwareSkills.length > 3 ? `<span class="text-[10px] text-slate-500 font-medium">+${student.softwareSkills.length - 3}</span>` : '';
+
+                // Render Spoken Pills (Show first 2)
+                const spPills = student.spokenLanguages.slice(0, 2).map(s => 
+                    `<span class="bg-slate-800/80 text-sky-300/90 text-[10px] px-2 py-0.5 rounded border border-slate-700/50">${s}</span>`
+                ).join(' ');
+                const extraSp = student.spokenLanguages.length > 2 ? `<span class="text-[10px] text-slate-500 font-medium">+${student.spokenLanguages.length - 2}</span>` : '';
+
+                return `
+                    <tr onclick="openModal('${student.id}')" class="hover:bg-[#1B2433]/70 transition cursor-pointer group">
+                        <!-- Student Info -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-slate-800 text-sky-400 flex items-center justify-center font-bold text-xs border border-slate-700/80 group-hover:border-sky-500/50 transition">
+                                    ${student.name.split(' ').map(n=>n[0]).join('')}
+                                </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 group-hover:text-brand-600 transition-colors">${rec.name}</h4>
-                                    <p class="text-xs font-mono text-slate-400">${rec.rollId}</p>
+                                    <div class="font-semibold text-slate-100 group-hover:text-sky-300 transition">${student.name}</div>
+                                    <div class="text-[11px] text-slate-400">${student.roll} • ${student.status}</div>
                                 </div>
                             </div>
-                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${rec.role === 'Student' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}">${rec.role}</span>
-                        </div>
+                        </td>
 
-                        <div class="space-y-1.5 mb-4 text-xs text-slate-600">
-                            <p class="truncate"><i class="fa-solid fa-graduation-cap text-brand-500 mr-1.5 w-4"></i> ${rec.branch}</p>
-                            <p class="flex items-center justify-between">
-                                <span><i class="fa-solid fa-award text-amber-500 mr-1.5 w-4"></i> CGPA: <strong>${rec.cgpa}</strong> (${rec.percentage}%)</span>
-                                <span class="text-slate-400">Class of ${rec.year}</span>
-                            </p>
-                        </div>
+                        <!-- Branch & Batch -->
+                        <td class="py-3.5 px-4">
+                            <div class="text-slate-200 font-medium text-xs">${student.branch}</div>
+                            <div class="text-[11px] text-sky-400/90 font-medium">${student.batch}</div>
+                        </td>
 
-                        <div class="flex flex-wrap gap-1 mb-4">
-                            ${rec.softwareLanguages.slice(0, 3).map(lang => `<span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-lg text-[11px] font-medium">${lang}</span>`).join('')}
-                            ${rec.softwareLanguages.length > 3 ? `<span class="px-1.5 py-0.5 bg-slate-50 text-slate-400 rounded-lg text-[10px]">+${rec.softwareLanguages.length - 3}</span>` : ''}
-                        </div>
-                    </div>
+                        <!-- CGPA -->
+                        <td class="py-3.5 px-4 font-semibold text-slate-200 text-xs">
+                            ${student.cgpa || "Not provided"}
+                        </td>
 
-                    <button onclick="openProfileModal(${rec.id})" class="w-full py-2 bg-slate-50 hover:bg-brand-50 hover:text-brand-600 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-eye text-xs"></i> View Full Profile
-                    </button>
-                </div>
-            `).join('');
-
-            // Table Rows
-            tableBody.innerHTML = filtered.map(rec => `
-                <tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-6">
-                        <div class="flex items-center space-x-3">
-                            <img src="${rec.avatar || 'https://placehold.co/100x100/6366f1/ffffff?text=Avatar'}" class="w-9 h-9 rounded-lg object-cover" onerror="this.src='https://placehold.co/100x100/6366f1/ffffff?text=Avatar'">
-                            <div>
-                                <p class="font-bold text-slate-900">${rec.name}</p>
-                                <p class="text-xs font-mono text-slate-400">${rec.rollId}</p>
+                        <!-- Software Skills -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex flex-wrap items-center gap-1">
+                                ${swPills} ${extraSw}
                             </div>
-                        </div>
-                    </td>
-                    <td class="py-3.5 px-6">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${rec.role === 'Student' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}">${rec.role}</span>
-                    </td>
-                    <td class="py-3.5 px-6">
-                        <p class="font-medium text-slate-800">${rec.branch}</p>
-                        <p class="text-xs text-slate-400">Year: ${rec.year}</p>
-                    </td>
-                    <td class="py-3.5 px-6 font-bold text-slate-800">
-                        ${rec.cgpa} <span class="text-xs font-normal text-slate-400">(${rec.percentage}%)</span>
-                    </td>
-                    <td class="py-3.5 px-6">
-                        <div class="flex flex-wrap gap-1 max-w-xs">
-                            ${rec.softwareLanguages.map(lang => `<span class="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-medium">${lang}</span>`).join('')}
-                        </div>
-                    </td>
-                    <td class="py-3.5 px-6 text-right">
-                        <button onclick="openProfileModal(${rec.id})" class="px-3 py-1.5 bg-brand-50 text-brand-600 hover:bg-brand-100 rounded-lg text-xs font-semibold transition-colors cursor-pointer">
-                            View
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+                        </td>
+
+                        <!-- Spoken Languages -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex flex-wrap items-center gap-1">
+                                ${spPills} ${extraSp}
+                            </div>
+                        </td>
+
+                        <!-- Success Score -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2">
+    <div class="w-12 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+        <div class="bg-sky-400 h-full rounded-full"
+             style="width: ${Number.isFinite(Number(student.successScore)) && student.successScore !== null && student.successScore !== "" ? Math.max(0, Math.min(100, Number(student.successScore))) : 0}%">
+        </div>
+    </div>
+    <span class="text-xs font-bold text-sky-400">
+        ${student.successScore == null || student.successScore === "" ? "Not calculated" : `${student.successScore}%`}
+    </span>
+</div>
+                        </td>
+
+                        <!-- Risk Flag -->
+                        <td class="py-3.5 px-4">
+                            <span class="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${riskBadgeClass}">
+                                ${student.riskFlag || "Not assessed"}
+                            </span>
+                        </td>
+
+                        <!-- Action -->
+                        <td class="py-3.5 px-4 text-center" onclick="event.stopPropagation()">
+                            <button onclick="openModal('${student.id}')" class="px-3 py-1 bg-slate-800 hover:bg-sky-500 hover:text-slate-950 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700 transition">
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        function setViewMode(mode) {
-            viewMode = mode;
-            const gridBtn = document.getElementById('gridBtn');
-            const tableBtn = document.getElementById('tableBtn');
-
-            if (mode === 'grid') {
-                gridBtn.className = "p-2 rounded-lg bg-brand-50 text-brand-600 text-sm transition-colors cursor-pointer";
-                tableBtn.className = "p-2 rounded-lg text-slate-400 hover:bg-slate-100 text-sm transition-colors cursor-pointer";
-            } else {
-                tableBtn.className = "p-2 rounded-lg bg-brand-50 text-brand-600 text-sm transition-colors cursor-pointer";
-                gridBtn.className = "p-2 rounded-lg text-slate-400 hover:bg-slate-100 text-sm transition-colors cursor-pointer";
-            }
+        // Reset All Filters
+        function resetAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'ALL';
+            document.getElementById('branchFilter').value = 'ALL';
+            document.getElementById('yearFilter').value = 'ALL';
+            selectedSoftware = [];
+            selectedSpoken = [];
+            renderPillOptions();
             applyFilters();
         }
 
-        // Profile Modal
-        function openProfileModal(id) {
-            const rec = records.find(r => r.id === id);
-            if (!rec) return;
+        // Modal Controls
+        function openModal(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
 
-            document.getElementById('modalAvatar').src = rec.avatar || 'https://placehold.co/100x100/6366f1/ffffff?text=Avatar';
-            document.getElementById('modalName').innerText = rec.name;
-            document.getElementById('modalRollId').innerText = `Roll ID: ${rec.rollId}`;
-            document.getElementById('modalEmail').innerHTML = `<i class="fa-regular fa-envelope text-brand-500 mr-1"></i> ${rec.email}`;
-            document.getElementById('modalCgpa').innerText = rec.cgpa;
-            document.getElementById('modalPercentage').innerText = `${rec.percentage}%`;
-            document.getElementById('modalBranch').innerText = rec.branch;
-            document.getElementById('modalYear').innerText = rec.year;
-            document.getElementById('modalInternships').innerText = rec.internships || 'None specified';
+            document.getElementById('modalAvatar').innerText = student.name.split(' ').map(n=>n[0]).join('');
+            document.getElementById('modalName').innerText = student.name;
+            document.getElementById('modalRoll').innerText = `Roll ID: ${student.roll}`;
+            document.getElementById('modalStatus').innerText = student.status;
+            document.getElementById('modalBatch').innerText = student.batch;
+            document.getElementById('modalCGPA').innerText = student.cgpa;
+            document.getElementById('modalSuccess').innerText = `${student.successScore}%`;
+            document.getElementById('modalBranch').innerText = student.branch;
+            document.getElementById('modalEmail').innerText = student.email;
 
-            const roleBadge = document.getElementById('modalRoleBadge');
-            roleBadge.innerText = rec.role;
-            roleBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-semibold ${rec.role === 'Student' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`;
+            // Software Skills
+            document.getElementById('modalSoftwareSkills').innerHTML = student.softwareSkills.map(s => 
+                `<span class="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs px-2.5 py-1 rounded-lg font-medium">${s}</span>`
+            ).join('');
 
-            document.getElementById('modalSoftware').innerHTML = rec.softwareLanguages.map(l => `<span class="px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-xs font-semibold">${l}</span>`).join('');
-            document.getElementById('modalCommunication').innerHTML = rec.communicationLanguages.map(l => `<span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold">${l}</span>`).join('');
-            document.getElementById('modalCertifications').innerHTML = rec.certifications.length ? rec.certifications.map(c => `<span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold"><i class="fa-solid fa-award mr-1"></i>${c}</span>`).join('') : '<span class="text-xs text-slate-400">None listed</span>';
-            document.getElementById('modalSoftSkills').innerHTML = rec.softSkills.map(s => `<span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium">${s}</span>`).join('');
+            // Spoken Languages
+            document.getElementById('modalSpokenLanguages').innerHTML = student.spokenLanguages.map(s => 
+                `<span class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1 rounded-lg font-medium">${s}</span>`
+            ).join('');
 
-            document.getElementById('modalLinkedin').href = rec.linkedin || '#';
-            document.getElementById('modalGithub').href = rec.github || '#';
+            // Certifications
+            document.getElementById('modalCertifications').innerHTML = student.certifications.map(c => 
+                `<li class="flex items-center gap-1.5"><i class="fa-solid fa-award text-amber-400 text-xs"></i> ${c}</li>`
+            ).join('');
 
-            document.getElementById('profileModal').classList.remove('hidden');
+            // Internships
+            document.getElementById('modalInternships').innerHTML = student.internships.map(i => 
+                `<li class="flex items-center gap-1.5"><i class="fa-solid fa-briefcase text-sky-400 text-xs"></i> ${i}</li>`
+            ).join('');
+
+            // Soft Skills
+            document.getElementById('modalSoftSkills').innerHTML = student.softSkills.map(s => 
+                `<span class="bg-slate-800/80 text-slate-300 border border-slate-700/80 text-xs px-2.5 py-1 rounded-lg">${s}</span>`
+            ).join('');
+
+            document.getElementById('modalLinkedin').href = student.linkedin;
+            document.getElementById('modalGithub').href = student.github;
+
+            document.getElementById('studentModal').classList.remove('hidden');
         }
 
         function closeModal() {
-            document.getElementById('profileModal').classList.add('hidden');
+            document.getElementById('studentModal').classList.add('hidden');
         }
 
-        // Add Record Modal
-        function openAddModal() {
-            document.getElementById('addModal').classList.remove('hidden');
-        }
-
-        function closeAddModal() {
-            document.getElementById('addModal').classList.add('hidden');
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const newRec = {
-                id: Date.now(),
-                name: document.getElementById('addName').value,
-                rollId: document.getElementById('addRollId').value,
-                role: document.getElementById('addRole').value,
-                branch: document.getElementById('addBranch').value,
-                cgpa: parseFloat(document.getElementById('addCgpa').value),
-                percentage: parseFloat(document.getElementById('addCgpa').value) * 10,
-                year: parseInt(document.getElementById('addYear').value),
-                email: document.getElementById('addEmail').value,
-                softwareLanguages: document.getElementById('addSoftware').value.split(',').map(s => s.trim()).filter(Boolean),
-                communicationLanguages: document.getElementById('addCommunication').value.split(',').map(s => s.trim()).filter(Boolean),
-                certifications: document.getElementById('addCertifications').value.split(',').map(s => s.trim()).filter(Boolean),
-                softSkills: document.getElementById('addSoftSkills').value.split(',').map(s => s.trim()).filter(Boolean),
-                internships: document.getElementById('addInternships').value,
-                linkedin: document.getElementById('addLinkedin').value,
-                github: document.getElementById('addGithub').value,
-                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'
-            };
-
-            records.unshift(newRec);
-            localStorage.setItem('c2c_records', JSON.stringify(records));
-            closeAddModal();
-            document.getElementById('addForm').reset();
-            populateFilterPills();
-            applyFilters();
-        }
-
-        // Export Data
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "campus2career_records.json");
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
-        }
-
-        // Theme Toggle
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-        }
-
-        // Charts Initialization & Update
-        function initCharts() {
-            const ctxSw = document.getElementById('softwareChart').getContext('2d');
-            softwareChartInstance = new Chart(ctxSw, {
-                type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Proficient Count', data: [], backgroundColor: '#6366f1', borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-            });
-
-            const ctxLang = document.getElementById('languageChart').getContext('2d');
-            languageChartInstance = new Chart(ctxLang, {
-                type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
-            });
-        }
-
-        function updateCharts(filtered) {
-            // Guard clause if charts are not yet initialized
-            if (!softwareChartInstance || !languageChartInstance) return;
-
-            // Software Language counts
-            const swCounts = {};
-            filtered.forEach(r => {
-                r.softwareLanguages.forEach(lang => {
-                    swCounts[lang] = (swCounts[lang] || 0) + 1;
-                });
-            });
-
-            const sortedSw = Object.entries(swCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            softwareChartInstance.data.labels = sortedSw.map(item => item[0]);
-            softwareChartInstance.data.datasets[0].data = sortedSw.map(item => item[1]);
-            softwareChartInstance.update();
-
-            // Communication Language counts
-            const commCounts = {};
-            filtered.forEach(r => {
-                r.communicationLanguages.forEach(lang => {
-                    commCounts[lang] = (commCounts[lang] || 0) + 1;
-                });
-            });
-
-            const sortedComm = Object.entries(commCounts).sort((a, b) => b[1] - a[1]);
-            languageChartInstance.data.labels = sortedComm.map(item => item[0]);
-            languageChartInstance.data.datasets[0].data = sortedComm.map(item => item[1]);
-            languageChartInstance.update();
-        }
+        // Close Modal on backdrop click
+        document.getElementById('studentModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('studentModal')) {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
