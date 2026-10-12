@@ -1,0 +1,6 @@
+student_id,name,department,year,attendance,marks,skills
+S001,Aarav,CSE,2,92,85,Python
+S002,Diya,ECE,3,78,72,Java
+S003,Rohan,CSE,2,65,58,Python;SQL
+S004,Meera,IT,4,96,91,Python;SQL;Power BI
+S005,Arjun,ECE,3,45,40,Java
