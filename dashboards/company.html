@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus2Career AI — College & Company Collaboration Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .brand h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: #eef2ff;
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            background: var(--bg-card);
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .content-body {
+            padding: 32px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Views */
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .metric-card h4 {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .metric-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Filters & Controls */
+        .filter-container {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+        }
+
+        .filter-group input:focus, .filter-group select:focus {
+            border-color: var(--primary);
+        }
+
+        /* Tables */
+        .table-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 14px 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        tr:hover {
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge.current { background: #d1fae5; color: #065f46; }
+        .badge.alumni { background: #e0e7ff; color: #3730a3; }
+        .badge.cse { background: #fdf2f8; color: #db2777; }
+        .badge.ece { background: #eff6ff; color: #1d4ed8; }
+        .badge.eee { background: #fffbeb; color: #b45309; }
+        .badge.mech { background: #f0fdf4; color: #15803d; }
+        .badge.civil { background: #f3f4f6; color: #374151; }
+
+        /* Buttons & Actions */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: #f1f5f9; }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-card);
+            width: 90%;
+            max-width: 800px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .profile-item label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .profile-item p {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside>
+        <div>
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <h1>Campus2Career</h1>
+            </div>
+            <div class="nav-links">
+                <a class="nav-item active" onclick="switchView('college-view')">
+                    <i class="fa-solid fa-chart-pie"></i> College Dashboard
+                </a>
+                <a class="nav-item" onclick="switchView('company-view')">
+                    <i class="fa-solid fa-building"></i> Company Portal
+                </a>
+            </div>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid var(--border);">
+            <p style="font-size: 12px; color: var(--text-muted);">Malineni Lakshmaiah Women's Engineering College</p>
+        </div>
+    </aside>
+
+    <!-- Main Application Container -->
+    <main>
+        <header>
+            <div class="header-title" id="page-header-title">
+                <h2>College Administration Dashboard</h2>
+                <p>Comprehensive overview of current students and passed-out alumni</p>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">AI</div>
+                <div>
+                    <h4 style="font-size: 14px; font-weight: 600;">AI Club Sec (Sec F)</h4>
+                    <p style="font-size: 11px; color: var(--text-muted);">Admin & Coordinator</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-body">
+            
+            <!-- VIEW 1: COLLEGE DASHBOARD -->
+            <div id="college-view" class="view-section active">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>Total Students & Alumni</h4>
+                        <div class="value" id="stat-total">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Current Students</h4>
+                        <div class="value" id="stat-current">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Passed-Out Alumni</h4>
+                        <div class="value" id="stat-alumni">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Average CGPA</h4>
+                        <div class="value" id="stat-cgpa">0.0</div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>All Student & Alumni Records</h3>
+                        <button class="btn" onclick="exportData()"><i class="fa-solid fa-download"></i> Export CSV</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll ID</th>
+                                <th>Name</th>
+                                <th>Branch</th>
+                                <th>Status</th>
+                                <th>Year / Batch</th>
+                                <th>CGPA</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody id="college-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW 2: COMPANY RECRUITER PORTAL -->
+            <div id="company-view" class="view-section">
+                <div class="filter-container">
+                    <div class="filter-group">
+                        <label>Universal Talent Search</label>
+                        <input type="text" id="search-input" placeholder="Search language (e.g. French), skill, name..." oninput="filterTalent()">
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="filter-status" onchange="filterTalent()">
+                            <option value="">All (Students & Alumni)</option>
+                            <option value="Current Student">Current Student</option>
+                            <option value="Alumni">Passed-Out Alumni</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Branch</label>
+                        <select id="filter-branch" onchange="filterTalent()">
+                            <option value="">All Branches</option>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="MECH">MECH</option>
+                            <option value="CIVIL">CIVIL</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Min CGPA</label>
+                        <input type="number" step="0.1" id="filter-cgpa" placeholder="e.g. 7.5" oninput="filterTalent()">
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3 id="talent-count-title">Matching Candidates (0)</h3>
+                        <span style="font-size: 13px; color: var(--text-muted);">Click any candidate for complete profile</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll ID</th>
+                                <th>Name</th>
+                                <th>Branch</th>
+                                <th>Status</th>
+                                <th>CGPA</th>
+                                <th>Software Languages</th>
+                                <th>Communication Languages</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="company-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Detailed Student Profile Modal -->
+    <div class="modal-overlay" id="student-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Candidate Full Profile</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-content">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive Database (Current Students & Passed-out Alumni)
+        const studentsData = [
+            {
+                rollId: "22F91A0501", name: "V. Sushma", branch: "CSE", status: "Current Student", year: "IV Year (2026)",
+                cgpa: 9.2, percentage: 92.0, email: "sushma.v@mlwec.ac.in",
+                software: ["Python", "JavaScript", "SQL", "C++"], communication: ["English", "Telugu", "French"],
+                certifications: ["AWS Cloud Practitioner", "Google Advanced Data Analytics"],
+                internships: ["AI/ML Research Intern at TechCorp", "Web Dev Intern"],
+                linkedin: "linkedin.com/in/v-sushma", github: "github.com/v-sushma", softSkills: "Leadership, Problem Solving, Team Management"
+            },
+            {
+                rollId: "22F91A0502", name: "V. Hanshitha", branch: "CSE", status: "Current Student", year: "IV Year (2026)",
+                cgpa: 8.9, percentage: 89.0, email: "hanshitha.v@mlwec.ac.in",
+                software: ["Java", "Python", "HTML/CSS"], communication: ["English", "Telugu", "Hindi"],
+                certifications: ["Oracle Java Certified", "Full Stack Web Development"],
+                internships: ["Software Engineering Intern at Infosys"],
+                linkedin: "linkedin.com/in/hanshitha-v", github: "github.com/hanshitha", softSkills: "Communication, Adaptability"
+            },
+            {
+                rollId: "21F91A0412", name: "K. Ramesh", branch: "ECE", status: "Alumni", year: "Passed Out (2025)",
+                cgpa: 8.5, percentage: 85.0, email: "ramesh.k@gmail.com",
+                software: ["Embedded C", "Python", "MATLAB"], communication: ["English", "Telugu", "French"],
+                certifications: ["IoT Systems Developer", "VLSI Design Basics"],
+                internships: ["Hardware Design Intern at Qualcomm"],
+                linkedin: "linkedin.com/in/ramesh-k", github: "github.com/ramesh-ece", softSkills: "Analytical Thinking, Hardware Testing"
+            },
+            {
+                rollId: "22F91A0515", name: "Y. Yasaswini", branch: "CSE", status: "Current Student", year: "IV Year (2026)",
+                cgpa: 9.4, percentage: 94.0, email: "yasaswini.y@mlwec.ac.in",
+                software: ["Python", "TensorFlow", "SQL", "React"], communication: ["English", "Telugu", "German"],
+                certifications: ["Deep Learning Specialization", "AWS Certified Developer"],
+                internships: ["AI Vision Intern at SmartLabs"],
+                linkedin: "linkedin.com/in/yasaswini-y", github: "github.com/yasaswini", softSkills: "Critical Thinking, Research"
+            },
+            {
+                rollId: "21F91A0205", name: "M. Suresh", branch: "EEE", status: "Alumni", year: "Passed Out (2025)",
+                cgpa: 8.1, percentage: 81.0, email: "suresh.m@gmail.com",
+                software: ["MATLAB", "Simulink", "C"], communication: ["English", "Telugu"],
+                certifications: ["Electrical Grid Automation"],
+                internships: ["Power Systems Trainee at NTPC"],
+                linkedin: "linkedin.com/in/suresh-eee", github: "github.com/suresh-eee", softSkills: "Safety Compliance, Project Management"
+            },
+            {
+                rollId: "22F91A0522", name: "Y. Harini", branch: "CSE", status: "Current Student", year: "IV Year (2026)",
+                cgpa: 8.8, percentage: 88.0, email: "harini.y@mlwec.ac.in",
+                software: ["Python", "C++", "HTML/CSS", "JavaScript"], communication: ["English", "Telugu", "French"],
+                certifications: ["Frontend Web UI Specialist"],
+                internships: ["UI/UX Intern at StartupHub"],
+                linkedin: "linkedin.com/in/harini-y", github: "github.com/harini", softSkills: "Creativity, Collaboration"
+            }
+        ];
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if(viewId === 'college-view') {
+                document.getElementById('page-header-title').innerHTML = `
+                    <h2>College Administration Dashboard</h2>
+                    <p>Comprehensive overview of current students and passed-out alumni</p>`;
+            } else {
+                document.getElementById('page-header-title').innerHTML = `
+                    <h2>Company Recruiter & Hiring Portal</h2>
+                    <p>Explore talent, filter by communication languages (e.g. French), and hire freshers</p>`;
+            }
+        }
+
+        function initDashboard() {
+            // Stats
+            document.getElementById('stat-total').innerText = studentsData.length;
+            document.getElementById('stat-current').innerText = studentsData.filter(s => s.status === 'Current Student').length;
+            document.getElementById('stat-alumni').innerText = studentsData.filter(s => s.status === 'Alumni').length;
+            const avgCgpa = (studentsData.reduce((acc, s) => acc + s.cgpa, 0) / studentsData.length).toFixed(2);
+            document.getElementById('stat-cgpa').innerText = avgCgpa;
+
+            populateCollegeTable(studentsData);
+            populateCompanyTable(studentsData);
+        }
+
+        function populateCollegeTable(data) {
+            const tbody = document.getElementById('college-table-body');
+            tbody.innerHTML = data.map(s => `
+                <tr onclick="openStudentModal('${s.rollId}')">
+                    <td><strong>${s.rollId}</strong></td>
+                    <td>${s.name}</td>
+                    <td><span class="badge ${s.branch.toLowerCase()}">${s.branch}</span></td>
+                    <td><span class="badge ${s.status === 'Current Student' ? 'current' : 'alumni'}">${s.status}</span></td>
+                    <td>${s.year}</td>
+                    <td>${s.cgpa}</td>
+                    <td>${s.email}</td>
+                </tr>
+            `).join('');
+        }
+
+        function populateCompanyTable(data) {
+            const tbody = document.getElementById('company-table-body');
+            document.getElementById('talent-count-title').innerText = `Matching Candidates (${data.length})`;
+            tbody.innerHTML = data.map(s => `
+                <tr onclick="openStudentModal('${s.rollId}')">
+                    <td><strong>${s.rollId}</strong></td>
+                    <td>${s.name}</td>
+                    <td><span class="badge ${s.branch.toLowerCase()}">${s.branch}</span></td>
+                    <td><span class="badge ${s.status === 'Current Student' ? 'current' : 'alumni'}">${s.status}</span></td>
+                    <td>${s.cgpa}</td>
+                    <td>${s.software.join(', ')}</td>
+                    <td><strong>${s.communication.join(', ')}</strong></td>
+                    <td><button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="event.stopPropagation(); inviteCandidate('${s.name}')">Invite</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTalent() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const status = document.getElementById('filter-status').value;
+            const branch = document.getElementById('filter-branch').value;
+            const minCgpa = parseFloat(document.getElementById('filter-cgpa').value) || 0;
+
+            const filtered = studentsData.filter(s => {
+                const matchStatus = !status || s.status === status;
+                const matchBranch = !branch || s.branch === branch;
+                const matchCgpa = s.cgpa >= minCgpa;
+
+                const searchableText = `${s.name} ${s.rollId} ${s.branch} ${s.software.join(' ')} ${s.communication.join(' ')} ${s.certifications.join(' ')} ${s.softSkills}`.toLowerCase();
+                const matchQuery = !query || searchableText.includes(query);
+
+                return matchStatus && matchBranch && matchCgpa && matchQuery;
+            });
+
+            populateCompanyTable(filtered);
+        }
+
+        function openStudentModal(rollId) {
+            const s = studentsData.find(item => item.rollId === rollId);
+            if (!s) return;
+
+            const modalBody = document.getElementById('modal-content');
+            modalBody.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+                    <div class="avatar" style="width: 60px; height: 60px; font-size: 22px;">${s.name.charAt(0)}</div>
+                    <div>
+                        <h2>${s.name}</h2>
+                        <p style="color: var(--text-muted); font-size: 14px;">Roll ID: <strong>${s.rollId}</strong> | ${s.year}</p>
+                    </div>
+                </div>
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <label>Branch & Status</label>
+                        <p><span class="badge ${s.branch.toLowerCase()}">${s.branch}</span> <span class="badge ${s.status === 'Current Student' ? 'current' : 'alumni'}">${s.status}</span></p>
+                    </div>
+                    <div class="profile-item">
+                        <label>Email Address</label>
+                        <p>${s.email}</p>
+                    </div>
+                    <div class="profile-item">
+                        <label>Academic Performance</label>
+                        <p>CGPA: <strong>${s.cgpa}</strong> (${s.percentage}%)</p>
+                    </div>
+                    <div class="profile-item">
+                        <label>Spoken / Communication Languages</label>
+                        <div class="tags-list">${s.communication.map(l => `<span class="tag" style="background: #eef2ff; color: var(--primary); font-weight: 600;">${l}</span>`).join('')}</div>
+                    </div>
+                    <div class="profile-item" style="grid-column: span 2;">
+                        <label>Software Languages Known</label>
+                        <div class="tags-list">${s.software.map(sw => `<span class="tag">${sw}</span>`).join('')}</div>
+                    </div>
+                    <div class="profile-item" style="grid-column: span 2;">
+                        <label>Certifications</label>
+                        <div class="tags-list">${s.certifications.map(c => `<span class="tag" style="background: #f0fdf4; color: #15803d;">${c}</span>`).join('')}</div>
+                    </div>
+                    <div class="profile-item" style="grid-column: span 2;">
+                        <label>Internships & Experience</label>
+                        <div class="tags-list">${s.internships.map(i => `<span class="tag" style="background: #fffbeb; color: #b45309;">${i}</span>`).join('')}</div>
+                    </div>
+                    <div class="profile-item" style="grid-column: span 2;">
+                        <label>Soft Skills</label>
+                        <p>${s.softSkills}</p>
+                    </div>
+                    <div class="profile-item">
+                        <label>LinkedIn Profile</label>
+                        <p><a href="https://${s.linkedin}" target="_blank" style="color: var(--primary);">${s.linkedin}</a></p>
+                    </div>
+                    <div class="profile-item">
+                        <label>GitHub Profile</label>
+                        <p><a href="https://${s.github}" target="_blank" style="color: var(--primary);">${s.github}</a></p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('student-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('student-modal').classList.remove('active');
+        }
+
+        function inviteCandidate(name) {
+            alert(`Interview invitation successfully sent to ${name}! They will receive an email and notification in their portal.`);
+        }
+
+        function exportData() {
+            alert('Student & Alumni dataset exported successfully as CSV.');
+        }
+
+        window.onload = initDashboard;
+    </script>
+</body>
+</html>

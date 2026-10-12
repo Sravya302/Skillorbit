@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus2Career AI — Personal Student Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                            950: '#0f0e26',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white custom-scrollbar">
+
+    <div id="toast" class="fixed top-5 right-5 z-50 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md hidden opacity-0 transition-all duration-300 transform translate-y-2">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <div>
+            <h4 id="toastTitle" class="text-xs font-bold text-white">Success</h4>
+            <p id="toastMessage" class="text-[11px] text-emerald-200">Profile updated successfully!</p>
+        </div>
+    </div>
+
+    <section id="authSection" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+        <div class="max-w-md w-full bg-slate-900/80 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl animate-fade-in">
+            <div class="text-center mb-8">
+                <div class="w-14 h-14 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h1 class="text-xl font-bold text-white tracking-tight">Student Portal Login</h1>
+                <p class="text-xs text-slate-400 mt-1">Access and manage your personal academic & career profile</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Roll ID / Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
+                        <input type="text" id="loginId" required placeholder="e.g. 2024CS001" class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                    </div>
+                </div>
+
+                <div id="loginError" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl text-center">
+                    Invalid credentials. Please try demo options below.
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-indigo-600/30 transition duration-200">
+                    Sign In to Portal
+                </button>
+            </form>
+
+            <!-- Quick Demo Accounts Switcher -->
+            <div class="mt-8 pt-6 border-t border-slate-800">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-3 text-center">Quick Demo Accounts (Click to Login)</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="quickLogin('2024CS001')" class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left transition text-xs group">
+                        <div class="font-bold text-slate-200 group-hover:text-indigo-400">Aarav Sharma</div>
+                        <div class="text-[10px] text-slate-500 font-mono">2024CS001 • CS</div>
+                    </button>
+                    <button onclick="quickLogin('2024EC042')" class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left transition text-xs group">
+                        <div class="font-bold text-slate-200 group-hover:text-indigo-400">Sophia Chen</div>
+                        <div class="text-[10px] text-slate-500 font-mono">2024EC042 • ECE</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="appDashboard" class="hidden min-h-screen flex flex-col md:flex-row bg-slate-950">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-slate-950 border-r border-slate-800 p-5 flex flex-col justify-between shrink-0">
+            <div class="space-y-6">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3 px-2">
+                    <div class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white text-lg shadow-md">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-sm text-white tracking-tight">Campus2Career</h2>
+                        <span class="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider">Student Portal</span>
+                    </div>
+                </div>
+
+                <!-- Nav Menu -->
+                <nav class="space-y-1">
+                    <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition text-indigo-400 bg-indigo-500/10 border border-indigo-500/20">
+                        <i class="fa-solid fa-chart-pie w-4"></i> Overview Dashboard
+                    </button>
+                    <button onclick="switchTab('edit')" id="nav-edit" class="nav-btn w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-900">
+                        <i class="fa-solid fa-user-pen w-4"></i> Edit Profile Data
+                    </button>
+                    <button onclick="switchTab('academics')" id="nav-academics" class="nav-btn w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-900">
+                        <i class="fa-solid fa-book-bookmark w-4"></i> Academics & Scores
+                    </button>
+                    <button onclick="switchTab('skills')" id="nav-skills" class="nav-btn w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-900">
+                        <i class="fa-solid fa-laptop-code w-4"></i> Skills & Experience
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Logged-in User Card Footer -->
+            <div class="pt-4 border-t border-slate-900 space-y-3">
+                <div class="flex items-center space-x-3 px-2">
+                    <div id="userAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                        AS
+                    </div>
+                    <div class="overflow-hidden">
+                        <div id="userNameSidebar" class="font-bold text-xs text-white truncate">Student Name</div>
+                        <div id="userRollSidebar" class="text-[10px] text-slate-500 font-mono truncate">Roll ID</div>
+                    </div>
+                </div>
+
+                <button onclick="handleLogout()" class="w-full py-2 bg-slate-900 hover:bg-rose-500/10 hover:text-rose-400 text-slate-400 border border-slate-800 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 sm:p-8 overflow-y-auto custom-scrollbar max-w-6xl mx-auto w-full">
+            
+            <!-- Top Header Bar -->
+            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+                <div>
+                    <h1 id="headerWelcome" class="text-lg font-bold text-white tracking-tight">Welcome back, Student! 👋</h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Manage your personal details, software skills, languages, and profile credentials.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="switchTab('edit')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+                    </button>
+                </div>
+            </header>
+
+            <section id="tab-overview-view" class="space-y-6 animate-fade-in">
+                
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 relative overflow-hidden">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Current CGPA</span>
+                        <div class="flex items-baseline space-x-2 mt-2">
+                            <span id="statCGPA" class="text-2xl font-black text-white">0.0</span>
+                            <span class="text-xs text-slate-500">/ 10.0</span>
+                        </div>
+                        <div class="mt-3 w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div id="statCGPABar" class="bg-indigo-500 h-full rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Aggregate Percentage</span>
+                        <div class="flex items-baseline space-x-1 mt-2">
+                            <span id="statPercentage" class="text-2xl font-black text-emerald-400">0</span>
+                            <span class="text-xs text-emerald-400 font-bold">%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-3"><i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Verified Academic Record</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Known Spoken Languages</span>
+                        <div id="statCommCount" class="text-2xl font-black text-amber-400 mt-2">0</div>
+                        <p id="statCommPreview" class="text-[10px] text-slate-400 mt-3 truncate">e.g. English, French</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Software Tech Stack</span>
+                        <div id="statSwCount" class="text-2xl font-black text-violet-400 mt-2">0</div>
+                        <p id="statSwPreview" class="text-[10px] text-slate-400 mt-3 truncate">e.g. Python, SQL</p>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Profile Overview (Showing all 13 fields) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Left Column: Personal & Academic -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+                                <i class="fa-solid fa-user"></i> Primary Information
+                            </h3>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Full Name</span>
+                                    <strong id="viewName" class="text-slate-100 font-semibold text-sm">-</strong>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Roll ID (Unique Identifier)</span>
+                                    <code id="viewRoll" class="text-indigo-300 font-mono text-xs bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">-</code>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Branch & Department</span>
+                                    <span id="viewBranch" class="text-slate-200">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Year / Semester</span>
+                                    <span id="viewYear" class="text-slate-200">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Email Address</span>
+                                    <a id="viewEmail" href="#" class="text-indigo-400 hover:underline flex items-center gap-1.5 mt-0.5">
+                                        <i class="fa-solid fa-envelope"></i> <span>-</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Web Profiles Links -->
+                        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-3">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+                                <i class="fa-solid fa-link"></i> External Profiles
+                            </h3>
+                            <div class="space-y-2">
+                                <a id="viewLinkedIn" href="#" target="_blank" class="w-full py-2 px-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-xl text-xs font-semibold transition flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fa-brands fa-linkedin"></i> LinkedIn Profile</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                </a>
+                                <a id="viewGitHub" href="#" target="_blank" class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fa-brands fa-github"></i> GitHub Profile</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Skills, Languages & Experience -->
+                    <div class="lg:col-span-2 space-y-6">
+                        
+                        <!-- Spoken Languages & Tech Stack -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-comments"></i> Communication Spoken Languages
+                                </h3>
+                                <div id="viewCommLangs" class="flex flex-wrap gap-1.5 min-h-[50px]"></div>
+                            </div>
+
+                            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-violet-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-code"></i> Learned Software Languages
+                                </h3>
+                                <div id="viewSwLangs" class="flex flex-wrap gap-1.5 min-h-[50px]"></div>
+                            </div>
+                        </div>
+
+                        <!-- Certifications & Soft Skills -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-certificate"></i> Certifications
+                                </h3>
+                                <ul id="viewCertifications" class="space-y-2 text-xs text-slate-300"></ul>
+                            </div>
+
+                            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-user-gear"></i> Soft Skills
+                                </h3>
+                                <div id="viewSoftSkills" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                        </div>
+
+                        <!-- Internships & Experience -->
+                        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+                                <i class="fa-solid fa-briefcase"></i> Internships & Industry Experience
+                            </h3>
+                            <div id="viewInternships" class="space-y-3"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-edit-view" class="hidden space-y-6 animate-fade-in">
+                <form id="editProfileForm" onsubmit="saveProfileEdits(event)" class="bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-8">
+                    
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-white">Edit Your Student Profile</h2>
+                            <p class="text-xs text-slate-400">Update your credentials, add spoken communication languages (e.g. French), soft skills, and experiences.</p>
+                        </div>
+                        <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Profile Changes
+                        </button>
+                    </div>
+
+                    <!-- 13 Editable Profile Fields Form Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Field 1: Name -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
+                            <input type="text" id="editName" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+
+                        <!-- Field 2: Roll ID (Read-only) -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Roll ID (Unique Identifier - Read Only)</label>
+                            <input type="text" id="editRoll" readonly class="w-full px-3.5 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-400 font-mono cursor-not-allowed">
+                        </div>
+
+                        <!-- Field 3: Branch -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Branch / Department</label>
+                            <select id="editBranch" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Electronics & Communication">Electronics & Communication</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Data Science & AI">Data Science & AI</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            </select>
+                        </div>
+
+                        <!-- Field 4: Year -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Year of Study</label>
+                            <select id="editYear" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
+                        </div>
+
+                        <!-- Field 5: Email -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
+                            <input type="email" id="editEmail" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+
+                        <!-- Field 6 & 7: CGPA & Percentage -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">CGPA (out of 10)</label>
+                                <input type="number" id="editCGPA" step="0.01" min="0" max="10" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Percentage (%)</label>
+                                <input type="number" id="editPercentage" step="0.1" min="0" max="100" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+
+                        <!-- Field 8: LinkedIn -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">LinkedIn Profile URL</label>
+                            <input type="url" id="editLinkedIn" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+
+                        <!-- Field 9: GitHub -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">GitHub Profile URL</label>
+                            <input type="url" id="editGitHub" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Tag Manager Fields -->
+                    <div class="space-y-6 pt-4 border-t border-slate-800">
+                        
+                        <!-- Field 10: Known Spoken Communication Languages -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1.5">
+                                Known Communication Languages (e.g. English, French, Hindi, Spanish)
+                            </label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="text" id="addCommInput" placeholder="Add language (e.g. French) and press Add..." class="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <button type="button" onclick="addTag('comm')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition">Add</button>
+                            </div>
+                            <div id="editCommTags" class="flex flex-wrap gap-1.5 p-3 bg-slate-950/60 rounded-xl border border-slate-800 min-h-[48px]"></div>
+                        </div>
+
+                        <!-- Field 11: Learned Software Languages -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-violet-400 mb-1.5">
+                                Learned Software Languages (e.g. Python, JavaScript, Java, SQL)
+                            </label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="text" id="addSwInput" placeholder="Add software language and press Add..." class="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <button type="button" onclick="addTag('sw')" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-bold transition">Add</button>
+                            </div>
+                            <div id="editSwTags" class="flex flex-wrap gap-1.5 p-3 bg-slate-950/60 rounded-xl border border-slate-800 min-h-[48px]"></div>
+                        </div>
+
+                        <!-- Field 12: Certifications -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-1.5">
+                                Certifications
+                            </label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="text" id="addCertInput" placeholder="Add certification (e.g. AWS Developer) and press Add..." class="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <button type="button" onclick="addTag('cert')" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold transition">Add</button>
+                            </div>
+                            <div id="editCertTags" class="flex flex-wrap gap-1.5 p-3 bg-slate-950/60 rounded-xl border border-slate-800 min-h-[48px]"></div>
+                        </div>
+
+                        <!-- Field 13: Soft Skills -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-pink-400 mb-1.5">
+                                Soft Skills
+                            </label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="text" id="addSoftInput" placeholder="Add soft skill (e.g. Leadership) and press Add..." class="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <button type="button" onclick="addTag('soft')" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-bold transition">Add</button>
+                            </div>
+                            <div id="editSoftTags" class="flex flex-wrap gap-1.5 p-3 bg-slate-950/60 rounded-xl border border-slate-800 min-h-[48px]"></div>
+                        </div>
+
+                        <!-- Internships Simple JSON/List Editor -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-indigo-400 mb-1.5">
+                                Internships / Industry Experience
+                            </label>
+                            <div class="space-y-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <input type="text" id="internRole" placeholder="Role (e.g. SDE Intern)" class="px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none">
+                                    <input type="text" id="internCompany" placeholder="Company (e.g. TechCorp)" class="px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none">
+                                    <div class="flex gap-2">
+                                        <input type="text" id="internDuration" placeholder="Duration (e.g. 3 mos)" class="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none">
+                                        <button type="button" onclick="addInternship()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">Add</button>
+                                    </div>
+                                </div>
+                                <div id="editInternshipList" class="space-y-2 p-3 bg-slate-950/60 rounded-xl border border-slate-800 min-h-[48px]"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="flex justify-end pt-4 border-t border-slate-800">
+                        <button type="submit" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-600/30 flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save & Apply Changes
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="tab-academics-view" class="hidden space-y-6 animate-fade-in">
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-indigo-400"></i> Academic Transcript Summary</h2>
+                    <p class="text-xs text-slate-400">Verified performance score metrics provided by the registrar office.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-500 font-bold block uppercase">Cumulative GPA</span>
+                            <span id="acadCGPA" class="text-3xl font-black text-indigo-400">0.0</span>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-500 font-bold block uppercase">Percentage Score</span>
+                            <span id="acadPercentage" class="text-3xl font-black text-emerald-400">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-skills-view" class="hidden space-y-6 animate-fade-in">
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-laptop-code text-violet-400"></i> Skill Stack Overview</h2>
+                    <p class="text-xs text-slate-400">Recruiters filter profiles using these languages and certifications.</p>
+                    <div class="space-y-4 pt-2">
+                        <div>
+                            <span class="text-xs font-bold text-slate-300 block mb-2">Spoken Languages:</span>
+                            <div id="skillsViewComm" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-300 block mb-2">Software Languages:</span>
+                            <div id="skillsViewSw" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Initial Mock Database for Students
+        const initialStudents = {
+            "2024CS001": {
+                rollId: "2024CS001",
+                password: "student123",
+                name: "Aarav Sharma",
+                branch: "Computer Science",
+                year: "4th Year",
+                email: "aarav.sharma@campus.edu",
+                cgpa: 8.9,
+                percentage: 84.5,
+                certifications: ["AWS Certified Developer Associate", "Meta Frontend Developer"],
+                learnedSoftwareLanguages: ["Python", "JavaScript", "C++", "SQL"],
+                knownCommunicationLanguages: ["English", "Hindi", "French"],
+                internships: [
+                    { role: "Software Developer Intern", company: "TechCorp Global", duration: "3 mos" },
+                    { role: "Data Analyst Intern", company: "FinLytics AI", duration: "2 mos" }
+                ],
+                linkedInProfile: "https://linkedin.com/in/aarav-sharma-demo",
+                githubProfile: "https://github.com/aarav-sharma-demo",
+                softSkills: ["Leadership", "Problem Solving", "Teamwork"]
+            },
+            "2024EC042": {
+                rollId: "2024EC042",
+                password: "student123",
+                name: "Sophia Chen",
+                branch: "Electronics & Communication",
+                year: "3rd Year",
+                email: "sophia.chen@campus.edu",
+                cgpa: 9.3,
+                percentage: 88.2,
+                certifications: ["TensorFlow Developer", "Google Cloud Associate"],
+                learnedSoftwareLanguages: ["Python", "Java", "R"],
+                knownCommunicationLanguages: ["English", "Mandarin", "Spanish", "French"],
+                internships: [
+                    { role: "AI Research Intern", company: "DeepMind Labs", duration: "4 mos" }
+                ],
+                linkedInProfile: "https://linkedin.com/in/sophia-chen-demo",
+                githubProfile: "https://github.com/sophia-chen-demo",
+                softSkills: ["Critical Thinking", "Public Speaking"]
+            }
+        };
+
+        // Local Storage State Management
+        function getDatabase() {
+            const saved = localStorage.getItem('c2c_students_db');
+            if (!saved) {
+                localStorage.setItem('c2c_students_db', JSON.stringify(initialStudents));
+                return initialStudents;
+            }
+            return JSON.parse(saved);
+        }
+
+        function saveDatabase(db) {
+            localStorage.setItem('c2c_students_db', JSON.stringify(db));
+        }
+
+        let currentStudentRoll = localStorage.getItem('c2c_logged_roll') || null;
+        let tempEditState = null;
+
+        // On Page Load Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            if (currentStudentRoll) {
+                showDashboard();
+            } else {
+                showAuth();
+            }
+        });
+
+        // Authentication Handlers
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginId').value.trim();
+            const db = getDatabase();
+
+            if (db[id]) {
+                currentStudentRoll = id;
+                localStorage.setItem('c2c_logged_roll', id);
+                document.getElementById('loginError').classList.add('hidden');
+                showDashboard();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function quickLogin(rollId) {
+            document.getElementById('loginId').value = rollId;
+            document.getElementById('loginPassword').value = 'student123';
+            currentStudentRoll = rollId;
+            localStorage.setItem('c2c_logged_roll', rollId);
+            showDashboard();
+        }
+
+        function handleLogout() {
+            currentStudentRoll = null;
+            localStorage.removeItem('c2c_logged_roll');
+            showAuth();
+        }
+
+        function showAuth() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('appDashboard').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('appDashboard').classList.remove('hidden');
+            renderStudentData();
+            switchTab('overview');
+        }
+
+        // Tab Navigation
+        function switchTab(tab) {
+            const tabs = ['overview', 'edit', 'academics', 'skills'];
+            tabs.forEach(t => {
+                const view = document.getElementById(`tab-${t}-view`);
+                const btn = document.getElementById(`nav-${t}`);
+                if (t === tab) {
+                    view.classList.remove('hidden');
+                    btn.className = "nav-btn w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition text-indigo-400 bg-indigo-500/10 border border-indigo-500/20";
+                } else {
+                    view.classList.add('hidden');
+                    btn.className = "nav-btn w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-900";
+                }
+            });
+        }
+
+        // Populate & Render All 13 Fields
+        function renderStudentData() {
+            const db = getDatabase();
+            const s = db[currentStudentRoll];
+            if (!s) return;
+
+            // Clone to temporary edit state
+            tempEditState = JSON.parse(JSON.stringify(s));
+
+            // Sidebar & Header
+            document.getElementById('userNameSidebar').textContent = s.name;
+            document.getElementById('userRollSidebar').textContent = s.rollId;
+            document.getElementById('userAvatar').textContent = s.name.split(' ').map(n=>n[0]).join('');
+            document.getElementById('headerWelcome').textContent = `Welcome back, ${s.name}! 👋`;
+
+            // Stat Cards
+            document.getElementById('statCGPA').textContent = parseFloat(s.cgpa).toFixed(1);
+            document.getElementById('statCGPABar').style.width = `${(s.cgpa / 10) * 100}%`;
+            document.getElementById('statPercentage').textContent = s.percentage;
+            
+            document.getElementById('statCommCount').textContent = s.knownCommunicationLanguages.length;
+            document.getElementById('statCommPreview').textContent = s.knownCommunicationLanguages.join(', ');
+
+            document.getElementById('statSwCount').textContent = s.learnedSoftwareLanguages.length;
+            document.getElementById('statSwPreview').textContent = s.learnedSoftwareLanguages.join(', ');
+
+            // Overview Read View (All 13 fields)
+            document.getElementById('viewName').textContent = s.name;
+            document.getElementById('viewRoll').textContent = s.rollId;
+            document.getElementById('viewBranch').textContent = s.branch;
+            document.getElementById('viewYear').textContent = s.year;
+            
+            const emailEl = document.getElementById('viewEmail');
+            emailEl.href = `mailto:${s.email}`;
+            emailEl.querySelector('span').textContent = s.email;
+
+            document.getElementById('viewLinkedIn').href = s.linkedInProfile || '#';
+            document.getElementById('viewGitHub').href = s.githubProfile || '#';
+
+            // Languages & Badges
+            document.getElementById('viewCommLangs').innerHTML = s.knownCommunicationLanguages.map(l => 
+                `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-500/20">${l}</span>`
+            ).join('');
+
+            document.getElementById('viewSwLangs').innerHTML = s.learnedSoftwareLanguages.map(l => 
+                `<span class="px-2.5 py-1 bg-violet-500/10 text-violet-300 text-xs font-bold rounded-lg border border-violet-500/20">${l}</span>`
+            ).join('');
+
+            document.getElementById('viewCertifications').innerHTML = s.certifications.map(c => 
+                `<li class="flex items-center gap-2"><i class="fa-solid fa-certificate text-amber-400"></i> ${c}</li>`
+            ).join('');
+
+            document.getElementById('viewSoftSkills').innerHTML = s.softSkills.map(sk => 
+                `<span class="px-2.5 py-1 bg-pink-500/10 text-pink-300 text-xs font-semibold rounded-lg border border-pink-500/20">${sk}</span>`
+            ).join('');
+
+            document.getElementById('viewInternships').innerHTML = s.internships.map(i => 
+                `<div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                        <strong class="text-white block font-semibold">${i.role}</strong>
+                        <span class="text-slate-400 text-[11px]">${i.company}</span>
+                    </div>
+                    <span class="bg-slate-900 px-2.5 py-1 rounded-md text-[10px] text-indigo-300 font-mono border border-slate-800">${i.duration}</span>
+                </div>`
+            ).join('');
+
+            // Populate Form Inputs
+            document.getElementById('editName').value = s.name;
+            document.getElementById('editRoll').value = s.rollId;
+            document.getElementById('editBranch').value = s.branch;
+            document.getElementById('editYear').value = s.year;
+            document.getElementById('editEmail').value = s.email;
+            document.getElementById('editCGPA').value = s.cgpa;
+            document.getElementById('editPercentage').value = s.percentage;
+            document.getElementById('editLinkedIn').value = s.linkedInProfile;
+            document.getElementById('editGitHub').value = s.githubProfile;
+
+            // Secondary Views
+            document.getElementById('acadCGPA').textContent = s.cgpa;
+            document.getElementById('acadPercentage').textContent = `${s.percentage}%`;
+            document.getElementById('skillsViewComm').innerHTML = document.getElementById('viewCommLangs').innerHTML;
+            document.getElementById('skillsViewSw').innerHTML = document.getElementById('viewSwLangs').innerHTML;
+
+            renderEditableTags();
+        }
+
+        // Render Editable Tag Pills in Edit View
+        function renderEditableTags() {
+            // Comm Langs
+            document.getElementById('editCommTags').innerHTML = tempEditState.knownCommunicationLanguages.map((l, idx) => `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-emerald-300 text-xs font-semibold rounded-lg border border-emerald-500/20">
+                    ${l}
+                    <button type="button" onclick="removeTag('comm', ${idx})" class="hover:text-rose-400 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                </span>
+            `).join('');
+
+            // Sw Langs
+            document.getElementById('editSwTags').innerHTML = tempEditState.learnedSoftwareLanguages.map((l, idx) => `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-violet-500/10 text-violet-300 text-xs font-semibold rounded-lg border border-violet-500/20">
+                    ${l}
+                    <button type="button" onclick="removeTag('sw', ${idx})" class="hover:text-rose-400 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                </span>
+            `).join('');
+
+            // Certs
+            document.getElementById('editCertTags').innerHTML = tempEditState.certifications.map((c, idx) => `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 text-amber-300 text-xs font-semibold rounded-lg border border-amber-500/20">
+                    ${c}
+                    <button type="button" onclick="removeTag('cert', ${idx})" class="hover:text-rose-400 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                </span>
+            `).join('');
+
+            // Soft Skills
+            document.getElementById('editSoftTags').innerHTML = tempEditState.softSkills.map((sk, idx) => `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/10 text-pink-300 text-xs font-semibold rounded-lg border border-pink-500/20">
+                    ${sk}
+                    <button type="button" onclick="removeTag('soft', ${idx})" class="hover:text-rose-400 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                </span>
+            `).join('');
+
+            // Internships
+            document.getElementById('editInternshipList').innerHTML = tempEditState.internships.map((i, idx) => `
+                <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
+                    <div>
+                        <strong class="text-white">${i.role}</strong> at <span class="text-indigo-300">${i.company}</span> (${i.duration})
+                    </div>
+                    <button type="button" onclick="removeInternship(${idx})" class="text-slate-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
+        // Add Tag Handlers
+        function addTag(type) {
+            let input, key;
+            if (type === 'comm') { input = document.getElementById('addCommInput'); key = 'knownCommunicationLanguages'; }
+            if (type === 'sw') { input = document.getElementById('addSwInput'); key = 'learnedSoftwareLanguages'; }
+            if (type === 'cert') { input = document.getElementById('addCertInput'); key = 'certifications'; }
+            if (type === 'soft') { input = document.getElementById('addSoftInput'); key = 'softSkills'; }
+
+            const val = input.value.trim();
+            if (val && !tempEditState[key].includes(val)) {
+                tempEditState[key].push(val);
+                input.value = '';
+                renderEditableTags();
+            }
+        }
+
+        function removeTag(type, idx) {
+            let key;
+            if (type === 'comm') key = 'knownCommunicationLanguages';
+            if (type === 'sw') key = 'learnedSoftwareLanguages';
+            if (type === 'cert') key = 'certifications';
+            if (type === 'soft') key = 'softSkills';
+
+            tempEditState[key].splice(idx, 1);
+            renderEditableTags();
+        }
+
+        function addInternship() {
+            const role = document.getElementById('internRole').value.trim();
+            const company = document.getElementById('internCompany').value.trim();
+            const duration = document.getElementById('internDuration').value.trim();
+
+            if (role && company) {
+                tempEditState.internships.push({ role, company, duration: duration || "N/A" });
+                document.getElementById('internRole').value = '';
+                document.getElementById('internCompany').value = '';
+                document.getElementById('internDuration').value = '';
+                renderEditableTags();
+            }
+        }
+
+        function removeInternship(idx) {
+            tempEditState.internships.splice(idx, 1);
+            renderEditableTags();
+        }
+
+        // Save Profile Edits Handler
+        function saveProfileEdits(e) {
+            e.preventDefault();
+
+            const db = getDatabase();
+            const updated = {
+                ...db[currentStudentRoll],
+                name: document.getElementById('editName').value.trim(),
+                branch: document.getElementById('editBranch').value,
+                year: document.getElementById('editYear').value,
+                email: document.getElementById('editEmail').value.trim(),
+                cgpa: parseFloat(document.getElementById('editCGPA').value),
+                percentage: parseFloat(document.getElementById('editPercentage').value),
+                linkedInProfile: document.getElementById('editLinkedIn').value.trim(),
+                githubProfile: document.getElementById('editGitHub').value.trim(),
+                knownCommunicationLanguages: tempEditState.knownCommunicationLanguages,
+                learnedSoftwareLanguages: tempEditState.learnedSoftwareLanguages,
+                certifications: tempEditState.certifications,
+                softSkills: tempEditState.softSkills,
+                internships: tempEditState.internships
+            };
+
+            db[currentStudentRoll] = updated;
+            saveDatabase(db);
+            renderStudentData();
+            showToast("Profile Updated", "Your changes have been saved to local storage.");
+            switchTab('overview');
+        }
+
+        // Notification Toast
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

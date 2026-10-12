@@ -1,8 +1,7 @@
 
 import csv
+import json
 import sqlite3
-from pathlib import Path
-
 import sys
 from pathlib import Path
 
@@ -11,7 +10,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database import create_table, get_connection
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CSV_FILE = PROJECT_ROOT / "data" / "demo_students.csv"
 
 REQUIRED_COLUMNS = [
@@ -23,6 +21,56 @@ REQUIRED_COLUMNS = [
     "marks",
     "skills",
 ]
+
+# Extra dashboard fields are optional.
+JSON_FIELDS = {
+    "spoken_languages",
+    "certifications",
+    "internships",
+    "soft_skills",
+}
+
+OPTIONAL_FIELDS = [
+    "batch",
+    "status",
+    "cgpa",
+    "percentage",
+    "email",
+    "spoken_languages",
+    "certifications",
+    "internships",
+    "soft_skills",
+    "linkedin",
+    "github",
+    "success_score",
+    "risk_flag",
+]
+
+
+def parse_list(value):
+    """Accept a semicolon-separated list or a JSON list."""
+    value = (value or "").strip()
+
+    if not value:
+        return []
+
+    if value.startswith("["):
+        try:
+            result = json.loads(value)
+            if isinstance(result, list):
+                return [
+                    str(item).strip()
+                    for item in result
+                    if str(item).strip()
+                ]
+        except json.JSONDecodeError:
+            pass
+
+    return [
+        item.strip()
+        for item in value.split(";")
+        if item.strip()
+    ]
 
 
 def validate_student(row, line_number):
@@ -68,11 +116,33 @@ def validate_student(row, line_number):
     cleaned["year"] = year
     cleaned["attendance"] = attendance
     cleaned["marks"] = marks
-    cleaned["skills"] = ";".join(
-        skill.strip()
-        for skill in cleaned["skills"].split(";")
-        if skill.strip()
-    )
+    cleaned["skills"] = ";".join(parse_list(cleaned["skills"]))
+
+    for field in OPTIONAL_FIELDS:
+        cleaned[field] = (row.get(field) or "").strip()
+
+    # Validate optional numeric fields only when provided.
+    for field in ("cgpa", "percentage", "success_score"):
+        value = cleaned[field]
+        if value:
+            try:
+                number = float(value)
+                if field == "cgpa" and not 0 <= number <= 10:
+                    raise ValueError
+                if field in ("percentage", "success_score") and not 0 <= number <= 100:
+                    raise ValueError
+                cleaned[field] = number
+            except ValueError:
+                return None, (
+                    f"Row {line_number}: {field} must be "
+                    + ("0-10" if field == "cgpa" else "0-100")
+                )
+        else:
+            cleaned[field] = None
+
+    # Store list fields as JSON so SQLite can retain each item.
+    for field in JSON_FIELDS:
+        cleaned[field] = json.dumps(parse_list(cleaned[field]))
 
     return cleaned, None
 
@@ -87,15 +157,22 @@ def import_students():
     skipped = 0
     seen_ids = set()
 
+    columns = REQUIRED_COLUMNS + OPTIONAL_FIELDS
+    placeholders = ", ".join("?" for _ in columns)
+    column_sql = ", ".join(columns)
+    update_sql = ", ".join(
+        f"{column} = excluded.{column}"
+        for column in columns
+        if column != "student_id"
+    )
+
     with CSV_FILE.open("r", newline="", encoding="utf-8-sig") as file:
         reader = csv.DictReader(file)
 
         if not reader.fieldnames:
             raise ValueError("CSV file is empty or has no header")
 
-        reader.fieldnames = [
-            name.strip() for name in reader.fieldnames
-        ]
+        reader.fieldnames = [name.strip() for name in reader.fieldnames]
 
         missing = set(REQUIRED_COLUMNS) - set(reader.fieldnames)
         if missing:
@@ -121,30 +198,41 @@ def import_students():
 
                 seen_ids.add(student_id)
 
+                values = []
+                for column in columns:
+                    value = student.get(column)
+
+                    # An older CSV has no extra fields. Preserve the
+                    # existing database value rather than erasing it.
+                    if column in OPTIONAL_FIELDS and not value:
+                        value = None
+
+                    values.append(value)
+
+                # Use COALESCE on optional values so importing an old CSV
+                # won't overwrite existing extra dashboard information.
+                optional_updates = ", ".join(
+                    f"{column} = COALESCE(excluded.{column}, students.{column})"
+                    for column in OPTIONAL_FIELDS
+                )
+                safe_update_sql = ", ".join([
+                    ", ".join(
+                        f"{column} = excluded.{column}"
+                        for column in REQUIRED_COLUMNS
+                        if column != "student_id"
+                    ),
+                    optional_updates,
+                ])
+
                 try:
                     conn.execute(
-                        """
-                        INSERT INTO students
-                        (student_id, name, department, year,
-                         attendance, marks, skills)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        f"""
+                        INSERT INTO students ({column_sql})
+                        VALUES ({placeholders})
                         ON CONFLICT(student_id) DO UPDATE SET
-                            name = excluded.name,
-                            department = excluded.department,
-                            year = excluded.year,
-                            attendance = excluded.attendance,
-                            marks = excluded.marks,
-                            skills = excluded.skills
+                            {safe_update_sql}
                         """,
-                        (
-                            student["student_id"],
-                            student["name"],
-                            student["department"],
-                            student["year"],
-                            student["attendance"],
-                            student["marks"],
-                            student["skills"],
-                        ),
+                        values,
                     )
                     imported += 1
                 except sqlite3.Error as exc:

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus2Career AI Student Directory & Analytics</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0B0F17',
+                        cardbg: '#111827',
+                        hoverbg: '#1F2937',
+                        accentblue: '#38BDF8',
+                        accentdark: '#0284C7',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F17;
+            color: #F3F4F6;
+        }
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1F2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+        /* Select dropdown dark override */
+        select option {
+            background-color: #111827;
+            color: #F3F4F6;
+        }
+    </style>
+</head>
+<body class="bg-[#0B0F17] text-slate-100 min-h-screen p-3 md:p-6 antialiased">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- Top Header Card -->
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-5 md:p-6 shadow-2xl relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">Student Directory & Analytics</h1>
+                        <span class="bg-sky-500/10 text-sky-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-500/20">AI Powered</span>
+                    </div>
+                    <p class="text-slate-400 text-sm mt-1">Filter students by status, branch, software languages, and communication skills.</p>
+                </div>
+                <div>
+                    <button id="resetFiltersBtn" onclick="resetAllFilters()" class="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 px-4 py-2 rounded-xl text-sm font-medium transition border border-sky-500/20">
+                        <i class="fa-solid fa-rotate-right text-xs"></i> Reset All Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dropdown & Search Controls -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
+                <!-- Search Input -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </div>
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search branch, student..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-[#1B2433] border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+                </div>
+
+                <!-- Status Filter Dropdown -->
+                <div class="relative">
+                    <select id="statusFilter" onchange="applyFilters()" class="w-full bg-[#1B2433] border border-slate-700/80 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 appearance-none focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 cursor-pointer pr-8 font-medium">
+                        <option value="ALL">All Statuses</option>
+                        <option value="Current Student">Current Student</option>
+                        <option value="Alumni / Passed Out">Alumni / Passed Out</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Branch Filter Dropdown -->
+                <div class="relative">
+                    <select id="branchFilter" onchange="applyFilters()" class="w-full bg-[#1B2433] border border-slate-700/80 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 appearance-none focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 cursor-pointer pr-8 font-medium">
+                        <option value="ALL">All Branches</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics & Communication">Electronics & Communication</option>
+                        <option value="Electrical Engineering">Electrical Engineering</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Student Year / Batch Filter Dropdown (User Requested Options) -->
+                <div class="relative">
+                    <select id="yearFilter" onchange="applyFilters()" class="w-full bg-[#1B2433] border border-slate-700/80 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 appearance-none focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 cursor-pointer pr-8 font-medium">
+                        <option value="ALL">All Students</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="Final Year">Final Year</option>
+                        <option value="Passed Out / Alumni">Passed Out / Alumni</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Software Languages Multi-Select Pills -->
+            <div class="mt-6 pt-5 border-t border-slate-800">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                    <i class="fa-solid fa-code text-sky-400 mr-1.5"></i> SOFTWARE LANGUAGES LEARNED (SELECT MULTIPLE)
+                </label>
+                <div id="softwarePills" class="flex flex-wrap gap-2">
+                    <!-- Dynamic Pill Badges -->
+                </div>
+            </div>
+
+            <!-- Spoken Languages Multi-Select Pills -->
+            <div class="mt-4">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                    <i class="fa-solid fa-comments text-sky-400 mr-1.5"></i> SPOKEN COMMUNICATION LANGUAGES (SELECT MULTIPLE)
+                </label>
+                <div id="spokenPills" class="flex flex-wrap gap-2">
+                    <!-- Dynamic Pill Badges -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Counter & Table Header -->
+        <div class="flex items-center justify-between px-1">
+            <h2 id="studentCounter" class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                SHOWING <span id="visibleCount" class="text-sky-400 font-extrabold">0</span> OF <span id="totalCount" class="text-slate-300">0</span> STUDENTS
+            </h2>
+            <div class="text-xs text-slate-400 flex items-center gap-2">
+                <span>Click any row for full profile analytics</span>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-[#161F2E] text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3.5 px-4">STUDENT INFO</th>
+                            <th class="py-3.5 px-4">BRANCH & BATCH</th>
+                            <th class="py-3.5 px-4">CGPA / %</th>
+                            <th class="py-3.5 px-4">KEY SOFTWARE SKILLS</th>
+                            <th class="py-3.5 px-4">SPOKEN LANGUAGES</th>
+                            <th class="py-3.5 px-4">SUCCESS SCORE</th>
+                            <th class="py-3.5 px-4">RISK FLAG</th>
+                            <th class="py-3.5 px-4 text-center">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody" class="divide-y divide-slate-800/60 text-sm">
+                        <!-- Dynamic Student Rows Rendered Here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-12 px-4">
+                <div class="w-12 h-12 rounded-full bg-slate-800/80 flex items-center justify-center mx-auto mb-3 text-slate-500">
+                    <i class="fa-solid fa-user-slash text-xl"></i>
+                </div>
+                <h3 class="text-base font-semibold text-slate-200">No students found</h3>
+                <p class="text-slate-400 text-sm mt-1">Try adjusting your filters or search keywords.</p>
+                <button onclick="resetAllFilters()" class="mt-4 px-4 py-1.5 bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs font-semibold rounded-lg hover:bg-sky-500/20 transition">Reset Filters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Profile Detail Modal -->
+    <div id="studentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity duration-200">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-[#111827]/95 backdrop-blur border-b border-slate-800 p-5 flex items-center justify-between z-10">
+                <div class="flex items-center gap-3">
+                    <div id="modalAvatar" class="w-12 h-12 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-lg border border-sky-500/30">
+                        JS
+                    </div>
+                    <div>
+                        <h3 id="modalName" class="text-xl font-bold text-white">Student Name</h3>
+                        <p id="modalRoll" class="text-xs text-slate-400">Roll ID: --</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 space-y-6">
+                <!-- Top Summary Stats -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#161F2E] p-4 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">Status</span>
+                        <span id="modalStatus" class="text-sm font-medium text-slate-200">--</span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">Year / Batch</span>
+                        <span id="modalBatch" class="text-sm font-medium text-sky-400">--</span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">CGPA / %</span>
+                        <span id="modalCGPA" class="text-sm font-bold text-emerald-400">--</span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] text-slate-400 uppercase font-semibold">Success Score</span>
+                        <span id="modalSuccess" class="text-sm font-bold text-sky-400">--</span>
+                    </div>
+                </div>
+
+                <!-- Academic & Branch Details -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Academic Details</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-xs block">Branch</span>
+                            <span id="modalBranch" class="font-medium text-slate-200">--</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-xs block">Email Address</span>
+                            <span id="modalEmail" class="font-medium text-slate-200 break-all">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Skills -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Software Languages Learned</h4>
+                    <div id="modalSoftwareSkills" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Spoken Communication Languages -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Spoken Languages</h4>
+                    <div id="modalSpokenLanguages" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Internships & Certifications -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Certifications</h4>
+                        <ul id="modalCertifications" class="text-xs space-y-1.5 text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Internships</h4>
+                        <ul id="modalInternships" class="text-xs space-y-1.5 text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Soft Skills -->
+                <div>
+                    <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Soft Skills</h4>
+                    <div id="modalSoftSkills" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- External Links -->
+                <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <a id="modalLinkedin" href="#" target="_blank" class="text-slate-400 hover:text-sky-400 transition flex items-center gap-1.5 text-xs font-medium bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-brands fa-linkedin text-sm text-sky-400"></i> LinkedIn
+                        </a>
+                        <a id="modalGithub" href="#" target="_blank" class="text-slate-400 hover:text-white transition flex items-center gap-1.5 text-xs font-medium bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-brands fa-github text-sm"></i> GitHub
+                        </a>
+                    </div>
+                    <button onclick="closeModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Student Dataset
+        let students = [];
+let loadingStudents = true;
+let apiError = "";
+
+const branchNames = {
+    CSE: "Computer Science",
+    IT: "Information Technology",
+    ECE: "Electronics & Communication",
+    EEE: "Electrical Engineering",
+    MECH: "Mechanical Engineering",
+    CIVIL: "Civil Engineering"
+};
+
+function formatList(value) {
+    if (Array.isArray(value)) return value;
+    if (!value) return [];
+
+    try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+    } catch (error) {
+        // Support semicolon-separated values too.
+    }
+
+    return String(value)
+        .split(";")
+        .map(item => item.trim())
+        .filter(Boolean);
+}
+
+function formatBatch(student) {
+    if (student.status === "Alumni / Passed Out") {
+        return "Passed Out / Alumni";
+    }
+
+    return student.batch || ({
+        1: "1st Year",
+        2: "2nd Year",
+        3: "3rd Year",
+        4: "Final Year"
+    }[student.year] || "Not provided");
+}
+
+function formatCgpa(student) {
+    const cgpa = student.cgpaVal ?? student.cgpa;
+    const percentage = student.percentage;
+
+    if (cgpa == null && percentage == null) {
+        return "Not provided";
+    }
+
+    const parts = [];
+
+    if (cgpa != null && cgpa !== "") {
+        parts.push(`${cgpa} CGPA`);
+    }
+
+    if (percentage != null && percentage !== "") {
+        parts.push(`${percentage}%`);
+    }
+
+    return parts.join(" / ");
+}
+
+function normalizeStudent(student) {
+    return {
+        ...student,
+        id: student.id || student.student_id,
+        roll: student.roll || student.student_id,
+        name: student.name || "Unknown",
+        branch: branchNames[student.branch || student.department]
+            || student.branch
+            || student.department
+            || "Not provided",
+        batch: formatBatch(student),
+        status: student.status || "Current Student",
+        cgpa: formatCgpa(student),
+        cgpaVal: student.cgpaVal ?? student.cgpa ?? null,
+        softwareSkills: formatList(
+            student.softwareSkills ?? student.skills
+        ),
+        spokenLanguages: formatList(
+            student.spokenLanguages ?? student.spoken_languages
+        ),
+        certifications: formatList(student.certifications),
+        internships: formatList(student.internships),
+        softSkills: formatList(
+            student.softSkills ?? student.soft_skills
+        ),
+        successScore: student.successScore ?? student.success_score ?? null,
+        riskFlag: student.riskFlag ?? student.risk_flag ?? null,
+        email: student.email || "",
+        linkedin: student.linkedin || "",
+        github: student.github || ""
+    };
+}
+
+async function loadStudents() {
+    loadingStudents = true;
+    apiError = "";
+
+    try {
+        const response = await fetch("/api/students");
+
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            throw new Error("Unexpected API response");
+        }
+
+        students = data.map(normalizeStudent);
+    } catch (error) {
+        apiError = error.message;
+        console.error("Could not load students:", error);
+    } finally {
+        loadingStudents = false;
+        applyFilters();
+    }
+} 
+        // Available Filter Pills Options
+        const softwareOptions = ["Python", "JavaScript", "React", "C++", "Java", "SQL", "Go", "AutoCAD", "MATLAB", "SystemVerilog", "Node.js", "HTML/CSS"];
+        const spokenOptions = ["English", "Hindi", "French", "German", "Telugu", "Spanish", "Tamil", "Japanese", "Mandarin"];
+
+        // Selected State for Multi-Select Pills
+        let selectedSoftware = [];
+        let selectedSpoken = [];
+
+        // Initialize UI Elements
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPillOptions();
+            loadStudents();
+        });
+
+        // Render Filter Pill Controls
+        function renderPillOptions() {
+            const swContainer = document.getElementById('softwarePills');
+            swContainer.innerHTML = softwareOptions.map(lang => {
+                const isSelected = selectedSoftware.includes(lang);
+                return `
+                    <button onclick="toggleSoftware('${lang}')" class="px-3 py-1 rounded-lg text-xs font-medium transition border ${
+                        isSelected 
+                        ? 'bg-sky-500 text-slate-950 font-semibold border-sky-400 shadow-sm shadow-sky-500/20' 
+                        : 'bg-[#1B2433] text-slate-300 border-slate-700/80 hover:bg-slate-700/60'
+                    }">
+                        ${isSelected ? '<i class="fa-solid fa-check mr-1 text-[10px]"></i>' : ''}${lang}
+                    </button>
+                `;
+            }).join('');
+
+            const spContainer = document.getElementById('spokenPills');
+            spContainer.innerHTML = spokenOptions.map(lang => {
+                const isSelected = selectedSpoken.includes(lang);
+                return `
+                    <button onclick="toggleSpoken('${lang}')" class="px-3 py-1 rounded-lg text-xs font-medium transition border ${
+                        isSelected 
+                        ? 'bg-sky-500 text-slate-950 font-semibold border-sky-400 shadow-sm shadow-sky-500/20' 
+                        : 'bg-[#1B2433] text-slate-300 border-slate-700/80 hover:bg-slate-700/60'
+                    }">
+                        ${isSelected ? '<i class="fa-solid fa-check mr-1 text-[10px]"></i>' : ''}${lang}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleSoftware(lang) {
+            if (selectedSoftware.includes(lang)) {
+                selectedSoftware = selectedSoftware.filter(item => item !== lang);
+            } else {
+                selectedSoftware.push(lang);
+            }
+            renderPillOptions();
+            applyFilters();
+        }
+
+        function toggleSpoken(lang) {
+            if (selectedSpoken.includes(lang)) {
+                selectedSpoken = selectedSpoken.filter(item => item !== lang);
+            } else {
+                selectedSpoken.push(lang);
+            }
+            renderPillOptions();
+            applyFilters();
+        }
+
+        // Apply All Filter Criteria
+        function applyFilters() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusVal = document.getElementById('statusFilter').value;
+            const branchVal = document.getElementById('branchFilter').value;
+            const yearVal = document.getElementById('yearFilter').value;
+
+            const filtered = students.filter(student => {
+                // Search Filter
+                const matchesSearch = !searchVal || 
+                    student.name.toLowerCase().includes(searchVal) ||
+                    student.branch.toLowerCase().includes(searchVal) ||
+                    student.roll.toLowerCase().includes(searchVal);
+
+                // Status Filter
+                const matchesStatus = statusVal === 'ALL' || student.status === statusVal;
+
+                // Branch Filter
+                const matchesBranch = branchVal === 'ALL' || student.branch === branchVal;
+
+                // Student Year Filter
+                const matchesYear = yearVal === 'ALL' || student.batch === yearVal;
+
+                // Software Skills Multi-Select Filter (Must match at least one selected if any)
+                const matchesSoftware = selectedSoftware.length === 0 || 
+                    selectedSoftware.every(sw => student.softwareSkills.includes(sw));
+
+                // Spoken Languages Multi-Select Filter (Must match at least one selected if any)
+                const matchesSpoken = selectedSpoken.length === 0 || 
+                    selectedSpoken.every(sp => student.spokenLanguages.includes(sp));
+
+                return matchesSearch && matchesStatus && matchesBranch && matchesYear && matchesSoftware && matchesSpoken;
+            });
+
+            renderStudentTable(filtered);
+        }
+
+        // Render Table Rows
+        function renderStudentTable(data) {
+            const tbody = document.getElementById('studentTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            document.getElementById('visibleCount').innerText = data.length;
+            document.getElementById('totalCount').innerText = students.length;
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            tbody.innerHTML = data.map(student => {
+                // Risk Badge Styles
+                const riskBadgeClass =
+    student.riskFlag === "High Risk"
+        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+        : student.riskFlag === "Medium Risk"
+            ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+            : student.riskFlag === "Low Risk"
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-slate-500/10 text-slate-400 border-slate-500/20";
+
+                // Render Software Pills (Show first 3)
+                const swPills = student.softwareSkills.slice(0, 3).map(s => 
+                    `<span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded border border-slate-700/60">${s}</span>`
+                ).join(' ');
+                const extraSw = student.softwareSkills.length > 3 ? `<span class="text-[10px] text-slate-500 font-medium">+${student.softwareSkills.length - 3}</span>` : '';
+
+                // Render Spoken Pills (Show first 2)
+                const spPills = student.spokenLanguages.slice(0, 2).map(s => 
+                    `<span class="bg-slate-800/80 text-sky-300/90 text-[10px] px-2 py-0.5 rounded border border-slate-700/50">${s}</span>`
+                ).join(' ');
+                const extraSp = student.spokenLanguages.length > 2 ? `<span class="text-[10px] text-slate-500 font-medium">+${student.spokenLanguages.length - 2}</span>` : '';
+
+                return `
+                    <tr onclick="openModal('${student.id}')" class="hover:bg-[#1B2433]/70 transition cursor-pointer group">
+                        <!-- Student Info -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-slate-800 text-sky-400 flex items-center justify-center font-bold text-xs border border-slate-700/80 group-hover:border-sky-500/50 transition">
+                                    ${student.name.split(' ').map(n=>n[0]).join('')}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-slate-100 group-hover:text-sky-300 transition">${student.name}</div>
+                                    <div class="text-[11px] text-slate-400">${student.roll} • ${student.status}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Branch & Batch -->
+                        <td class="py-3.5 px-4">
+                            <div class="text-slate-200 font-medium text-xs">${student.branch}</div>
+                            <div class="text-[11px] text-sky-400/90 font-medium">${student.batch}</div>
+                        </td>
+
+                        <!-- CGPA -->
+                        <td class="py-3.5 px-4 font-semibold text-slate-200 text-xs">
+                            ${student.cgpa || "Not provided"}
+                        </td>
+
+                        <!-- Software Skills -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex flex-wrap items-center gap-1">
+                                ${swPills} ${extraSw}
+                            </div>
+                        </td>
+
+                        <!-- Spoken Languages -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex flex-wrap items-center gap-1">
+                                ${spPills} ${extraSp}
+                            </div>
+                        </td>
+
+                        <!-- Success Score -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2">
+    <div class="w-12 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+        <div class="bg-sky-400 h-full rounded-full"
+             style="width: ${Number.isFinite(Number(student.successScore)) && student.successScore !== null && student.successScore !== "" ? Math.max(0, Math.min(100, Number(student.successScore))) : 0}%">
+        </div>
+    </div>
+    <span class="text-xs font-bold text-sky-400">
+        ${student.successScore == null || student.successScore === "" ? "Not calculated" : `${student.successScore}%`}
+    </span>
+</div>
+                        </td>
+
+                        <!-- Risk Flag -->
+                        <td class="py-3.5 px-4">
+                            <span class="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${riskBadgeClass}">
+                                ${student.riskFlag || "Not assessed"}
+                            </span>
+                        </td>
+
+                        <!-- Action -->
+                        <td class="py-3.5 px-4 text-center" onclick="event.stopPropagation()">
+                            <button onclick="openModal('${student.id}')" class="px-3 py-1 bg-slate-800 hover:bg-sky-500 hover:text-slate-950 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700 transition">
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Reset All Filters
+        function resetAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'ALL';
+            document.getElementById('branchFilter').value = 'ALL';
+            document.getElementById('yearFilter').value = 'ALL';
+            selectedSoftware = [];
+            selectedSpoken = [];
+            renderPillOptions();
+            applyFilters();
+        }
+
+        // Modal Controls
+        function openModal(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            document.getElementById('modalAvatar').innerText = student.name.split(' ').map(n=>n[0]).join('');
+            document.getElementById('modalName').innerText = student.name;
+            document.getElementById('modalRoll').innerText = `Roll ID: ${student.roll}`;
+            document.getElementById('modalStatus').innerText = student.status;
+            document.getElementById('modalBatch').innerText = student.batch;
+            document.getElementById('modalCGPA').innerText = student.cgpa;
+            document.getElementById('modalSuccess').innerText = `${student.successScore}%`;
+            document.getElementById('modalBranch').innerText = student.branch;
+            document.getElementById('modalEmail').innerText = student.email;
+
+            // Software Skills
+            document.getElementById('modalSoftwareSkills').innerHTML = student.softwareSkills.map(s => 
+                `<span class="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs px-2.5 py-1 rounded-lg font-medium">${s}</span>`
+            ).join('');
+
+            // Spoken Languages
+            document.getElementById('modalSpokenLanguages').innerHTML = student.spokenLanguages.map(s => 
+                `<span class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1 rounded-lg font-medium">${s}</span>`
+            ).join('');
+
+            // Certifications
+            document.getElementById('modalCertifications').innerHTML = student.certifications.map(c => 
+                `<li class="flex items-center gap-1.5"><i class="fa-solid fa-award text-amber-400 text-xs"></i> ${c}</li>`
+            ).join('');
+
+            // Internships
+            document.getElementById('modalInternships').innerHTML = student.internships.map(i => 
+                `<li class="flex items-center gap-1.5"><i class="fa-solid fa-briefcase text-sky-400 text-xs"></i> ${i}</li>`
+            ).join('');
+
+            // Soft Skills
+            document.getElementById('modalSoftSkills').innerHTML = student.softSkills.map(s => 
+                `<span class="bg-slate-800/80 text-slate-300 border border-slate-700/80 text-xs px-2.5 py-1 rounded-lg">${s}</span>`
+            ).join('');
+
+            document.getElementById('modalLinkedin').href = student.linkedin;
+            document.getElementById('modalGithub').href = student.github;
+
+            document.getElementById('studentModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('studentModal').classList.add('hidden');
+        }
+
+        // Close Modal on backdrop click
+        document.getElementById('studentModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('studentModal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

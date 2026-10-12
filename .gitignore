@@ -220,3 +220,7 @@ __marimo__/
 .streamlit/secrets.toml
 skillorbit.db
 skillorbit.db
+*.db
+*.db-journal
+__pycache__/
+*.pyc
